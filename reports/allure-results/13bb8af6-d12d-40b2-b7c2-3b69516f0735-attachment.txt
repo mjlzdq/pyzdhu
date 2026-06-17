@@ -1,0 +1,4 @@
+2026-06-16 13:47:06 [INFO] AutoTest - 测试：获取文章 ID=1
+2026-06-16 13:47:06 [INFO] AutoTest - [HTTP] GET https://jsonplaceholder.typicode.com/posts/1 (attempt 1)
+2026-06-16 13:47:06 [INFO] AutoTest - [HTTP] Response 200 in 0.23s
+2026-06-16 13:47:06 [INFO] AutoTest - 文章标题: sunt aut facere repellat provident occaecati excepturi optio reprehenderit

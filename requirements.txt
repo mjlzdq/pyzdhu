@@ -1,0 +1,7 @@
+pytest>=7.4.0
+requests>=2.31.0
+playwright>=1.40.0
+pytest-html>=4.1.0
+pytest-xdist>=3.5.0
+PyYAML>=6.0.1
+allure-pytest>=2.13.0

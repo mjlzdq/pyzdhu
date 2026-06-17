@@ -1,0 +1,4 @@
+INFO     AutoTest:test_posts.py:99 测试：全量更新文章 ID=1
+INFO     AutoTest:http_client.py:32 [HTTP] PUT https://jsonplaceholder.typicode.com/posts/1 (attempt 1)
+INFO     AutoTest:http_client.py:36 [HTTP] Response 200 in 0.76s
+INFO     AutoTest:test_posts.py:107 更新成功: 更新后的标题

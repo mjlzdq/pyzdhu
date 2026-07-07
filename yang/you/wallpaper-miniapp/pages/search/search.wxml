@@ -1,0 +1,95 @@
+<!-- pages/search/search.wxml -->
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-header">
+    <view class="search-input-wrapper">
+      <text class="search-icon">🔍</text>
+      <input class="search-input" 
+             placeholder="搜索壁纸、头像、分类..." 
+             value="{{keyword}}"
+             bindinput="onInput"
+             bindconfirm="onSearch"
+             focus="{{true}}"
+             confirm-type="search">
+      </input>
+      <text class="clear-btn" wx:if="{{keyword}}" bindtap="clearInput">✕</text>
+    </view>
+    <text class="cancel-btn" bindtap="goBack">取消</text>
+  </view>
+
+  <!-- 搜索历史 -->
+  <view class="search-history" wx:if="{{!keyword && historyList.length > 0 && !hasSearched}}">
+    <view class="history-header">
+      <text class="history-title">搜索历史</text>
+      <text class="history-clear" bindtap="clearHistory">🗑️ 清空</text>
+    </view>
+    <view class="history-tags">
+      <text class="history-tag" 
+            wx:for="{{historyList}}" wx:key="*this"
+            bindtap="searchHistory" data-keyword="{{item}}">
+        {{item}}
+      </text>
+    </view>
+  </view>
+
+  <!-- 热门搜索 -->
+  <view class="hot-search" wx:if="{{!keyword && !hasSearched}}">
+    <view class="hot-title">🔥 热门搜索</view>
+    <view class="hot-tags">
+      <text class="hot-tag" wx:for="{{hotTags}}" wx:key="*this" bindtap="searchHot" data-keyword="{{item}}">
+        {{item}}
+      </text>
+    </view>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="search-results" wx:if="{{hasSearched}}">
+    <view class="result-header">
+      <text class="result-count">找到 {{totalCount}} 张壁纸</text>
+    </view>
+
+    <view class="waterfall" wx:if="{{wallpapers.length > 0}}">
+      <view class="waterfall-column">
+        <block wx:for="{{leftList}}" wx:key="_id">
+          <view class="wallpaper-card" bindtap="goDetail" data-id="{{item._id}}">
+            <image class="wallpaper-img" src="{{item.thumbUrl || item.url}}" mode="widthFix" lazy-load="{{true}}" style="height: {{item.displayHeight}}px;"></image>
+            <view class="wallpaper-info">
+              <text class="wallpaper-tag">{{item.category}}</text>
+              <text class="like-count">❤️ {{item.likes || 0}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
+      <view class="waterfall-column">
+        <block wx:for="{{rightList}}" wx:key="_id">
+          <view class="wallpaper-card" bindtap="goDetail" data-id="{{item._id}}">
+            <image class="wallpaper-img" src="{{item.thumbUrl || item.url}}" mode="widthFix" lazy-load="{{true}}" style="height: {{item.displayHeight}}px;"></image>
+            <view class="wallpaper-info">
+              <text class="wallpaper-tag">{{item.category}}</text>
+              <text class="like-count">❤️ {{item.likes || 0}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="loading-wrapper" wx:if="{{loading}}">
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+    </view>
+
+    <!-- 没有更多 -->
+    <view class="load-more" wx:if="{{!loading && wallpapers.length > 0 && noMore}}">
+      <text>— 已经到底了 —</text>
+    </view>
+
+    <!-- 无结果 -->
+    <view class="empty-state" wx:if="{{!loading && wallpapers.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-text">没有找到相关壁纸</text>
+      <text class="empty-sub">换个关键词试试吧~</text>
+    </view>
+  </view>
+</view>

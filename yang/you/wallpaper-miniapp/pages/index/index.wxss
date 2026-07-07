@@ -1,0 +1,111 @@
+/* pages/index/index.wxss */
+.container {
+  padding-bottom: 20rpx;
+}
+
+/* 搜索栏 */
+.search-bar {
+  padding: 20rpx 30rpx;
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  background: #1a1a2e;
+  border: 2rpx solid #2a2a4a;
+  border-radius: 40rpx;
+  padding: 18rpx 28rpx;
+}
+
+.search-icon {
+  font-size: 32rpx;
+  margin-right: 16rpx;
+}
+
+.search-placeholder {
+  color: #555;
+  font-size: 28rpx;
+}
+
+/* 分类滚动条 */
+.category-scroll {
+  white-space: nowrap;
+  padding: 10rpx 20rpx 20rpx;
+}
+
+.category-item {
+  display: inline-block;
+  padding: 14rpx 28rpx;
+  margin: 0 8rpx;
+  background: #1a1a2e;
+  border-radius: 28rpx;
+  font-size: 26rpx;
+  color: #8888aa;
+  transition: all 0.3s;
+}
+
+.category-item.active {
+  background: linear-gradient(135deg, #6c63ff, #e94560);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 瀑布流 */
+.waterfall {
+  display: flex;
+  padding: 0 16rpx;
+  gap: 16rpx;
+}
+
+.waterfall-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+/* 壁纸卡片 */
+.wallpaper-card {
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #1a1a2e;
+  transition: transform 0.2s;
+}
+
+.wallpaper-card:active {
+  transform: scale(0.97);
+}
+
+.wallpaper-img {
+  width: 100%;
+  display: block;
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.wallpaper-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14rpx 16rpx;
+}
+
+.wallpaper-tag {
+  font-size: 22rpx;
+  color: #6c63ff;
+  background: rgba(108, 99, 255, 0.15);
+  padding: 4rpx 14rpx;
+  border-radius: 12rpx;
+}
+
+.like-count {
+  font-size: 22rpx;
+  color: #888;
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 40rpx;
+  color: #555;
+  font-size: 24rpx;
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Generate Tab Icons</title></head>
+<body>
+<h2>微信小程序 Tab 图标生成器</h2>
+<p>点击下方按钮生成 8 个图标 PNG 文件</p>
+<button id="gen" style="padding:10px 20px;font-size:18px">🎨 生成并下载全部 8 个图标</button>
+<pre id="log" style="background:#1a1a2e;color:#0f0;padding:12px;margin-top:10px"></pre>
+
+<script>
+const S = 81, C = Math.floor(S/2);
+
+function createCanvas() {
+    const c = document.createElement('canvas');
+    c.width = S; c.height = S;
+    return c;
+}
+
+function drawHome(ctx, active) {
+    const color = active ? '#07C160' : '#999999';
+    ctx.fillStyle = color;
+    // 屋顶
+    ctx.beginPath();
+    ctx.moveTo(C, 14);
+    ctx.lineTo(C-26, 38);
+    ctx.lineTo(C+26, 38);
+    ctx.closePath();
+    ctx.fill();
+    // 墙
+    ctx.fillRect(C-26, 36, 52, 28);
+    // 门(白)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(C-8, 48, 16, 16);
+    // 窗户(白)
+    ctx.fillRect(C-22, 44, 9, 9);
+    ctx.fillRect(C+13, 44, 9, 9);
+}
+
+function drawCategory(ctx, active) {
+    const color = active ? '#07C160' : '#999999';
+    const sz = 15, gap = 5;
+    ctx.fillStyle = color;
+    ctx.fillRect(C-sz-gap, C-sz-gap, sz, sz);
+    ctx.fillRect(C+gap, C-sz-gap, sz, sz);
+    ctx.fillRect(C-sz-gap, C+gap, sz, sz);
+    ctx.fillRect(C+gap, C+gap, sz, sz);
+}
+
+function drawSearch(ctx, active) {
+    const color = active ? '#07C160' : '#999999';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    // 圆环
+    ctx.beginPath();
+    ctx.arc(C-3, C-3, 17, 0, Math.PI*2);
+    ctx.stroke();
+    // 手柄
+    const angle = Math.PI / 4;
+    const hx = C - 3 + Math.cos(angle) * 15;
+    const hy = C - 3 + Math.sin(angle) * 15;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy);
+    ctx.lineTo(C+14, C+14);
+    ctx.stroke();
+}
+
+function drawMine(ctx, active) {
+    const color = active ? '#07C160' : '#999999';
+    ctx.fillStyle = color;
+    // 头
+    ctx.beginPath();
+    ctx.arc(C, 24, 13, 0, Math.PI*2);
+    ctx.fill();
+    // 身体半圆
+    ctx.beginPath();
+    ctx.arc(C, 56, 22, Math.PI, 0, true);
+    ctx.fill();
+}
+
+function download(name, dataUrl) {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = name;
+    a.click();
+}
+
+document.getElementById('gen').onclick = function() {
+    const log = document.getElementById('log');
+    log.textContent = '';
+    const icons = [
+        ['home.png', drawHome, false],
+        ['home-active.png', drawHome, true],
+        ['category.png', drawCategory, false],
+        ['category-active.png', drawCategory, true],
+        ['search.png', drawSearch, false],
+        ['search-active.png', drawSearch, true],
+        ['mine.png', drawMine, false],
+        ['mine-active.png', drawMine, true],
+    ];
+    
+    icons.forEach(([name, drawFn, active]) => {
+        const canvas = createCanvas();
+        const ctx = canvas.getContext('2d');
+        drawFn(ctx, active);
+        const dataUrl = canvas.toDataURL('image/png');
+        const sizeKB = (atob(dataUrl.split(',')[1]).length / 1024).toFixed(1);
+        download(name, dataUrl);
+        log.textContent += `${sizeKB <= 40 ? '✅' : '❌'} ${name} — ${sizeKB} KB\n`;
+    });
+    log.textContent += '\n✨ 全部完成！请检查下载文件夹。\n';
+};
+</script>
+</body>
+</html>

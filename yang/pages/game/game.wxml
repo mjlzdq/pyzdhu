@@ -1,0 +1,154 @@
+<!-- pages/game/game.wxml -->
+<view class="game-container">
+  <!-- 顶部栏 -->
+  <view class="top-bar">
+    <view class="top-left">
+      <view class="back-btn" bindtap="goHome">‹ 返回</view>
+    </view>
+    <view class="top-center">
+      <view class="score-area">
+        <text class="score-label">得分</text>
+        <text class="score-value">{{score}}</text>
+      </view>
+      <view wx:if="{{mode === 'challenge'}}" class="level-badge">
+        <text class="level-label">第</text>
+        <text class="level-value">{{challengeLevel}}</text>
+        <text class="level-label">关</text>
+      </view>
+      <view class="steps-area">
+        <text class="steps-label">步数</text>
+        <text class="steps-value">{{steps}}</text>
+      </view>
+    </view>
+    <view class="top-right"></view>
+  </view>
+
+  <!-- 游戏区域 - 中间卡片堆 -->
+  <view class="game-board">
+    <view
+      wx:for="{{cards}}"
+      wx:key="id"
+      wx:if="{{!item.removed}}"
+      class="card {{item.blocked ? 'blocked' : ''}} {{item.hint ? 'hint' : ''}}"
+      style="left: {{item.x}}px; top: {{item.y}}px; z-index: {{item.layer * 100}}; width: {{cardW}}px; height: {{cardH}}px; font-size: {{cardW * 0.5}}px;"
+      data-id="{{item.id}}"
+      bindtap="onCardTap"
+    >
+      <text>{{item.type}}</text>
+    </view>
+  </view>
+
+  <!-- 槽位 -->
+  <view class="slot-area">
+    <view class="slot-row">
+      <view
+        wx:for="{{maxSlot + extraSlotCount}}"
+        wx:key="index"
+        class="slot-box {{index < slot.length ? 'filled' : ''}} {{slot.length >= maxSlot + extraSlotCount ? 'danger' : ''}}"
+      >
+        <text wx:if="{{index < slot.length}}">{{slot[index].type}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 道具栏（使用 + 获取合并） -->
+  <view class="tools-bar">
+    <!-- 撤回 -->
+    <view wx:if="{{tools.revoke > 0}}" class="tool-btn" bindtap="useTool" data-type="revoke">
+      <text class="tool-icon">↩️</text>
+      <view class="tool-info">
+        <text class="tool-name">撤回</text>
+        <text class="tool-count">×{{tools.revoke}}</text>
+      </view>
+    </view>
+    <view wx:else class="tool-btn empty tool-get" bindtap="getToolByAd" data-tool="revoke">
+      <text class="tool-icon">📺</text>
+      <view class="tool-info">
+        <text class="tool-name">撤回</text>
+        <text class="tool-count">获取</text>
+      </view>
+    </view>
+
+    <!-- 洗牌 -->
+    <view wx:if="{{tools.shuffle > 0}}" class="tool-btn" bindtap="useTool" data-type="shuffle">
+      <text class="tool-icon">🔀</text>
+      <view class="tool-info">
+        <text class="tool-name">洗牌</text>
+        <text class="tool-count">×{{tools.shuffle}}</text>
+      </view>
+    </view>
+    <view wx:else class="tool-btn empty tool-get" bindtap="getToolByAd" data-tool="shuffle">
+      <text class="tool-icon">📺</text>
+      <view class="tool-info">
+        <text class="tool-name">洗牌</text>
+        <text class="tool-count">获取</text>
+      </view>
+    </view>
+
+    <!-- 加槽 -->
+    <view wx:if="{{tools.extraSlot > 0}}" class="tool-btn" bindtap="useTool" data-type="extraSlot">
+      <text class="tool-icon">➕</text>
+      <view class="tool-info">
+        <text class="tool-name">加槽</text>
+        <text class="tool-count">×{{tools.extraSlot}}</text>
+      </view>
+    </view>
+    <view wx:else class="tool-btn empty tool-get" bindtap="getToolByAd" data-tool="extraSlot">
+      <text class="tool-icon">📺</text>
+      <view class="tool-info">
+        <text class="tool-name">加槽</text>
+        <text class="tool-count">获取</text>
+      </view>
+    </view>
+
+    <!-- 提示 -->
+    <view wx:if="{{tools.hint > 0}}" class="tool-btn" bindtap="useTool" data-type="hint">
+      <text class="tool-icon">💡</text>
+      <view class="tool-info">
+        <text class="tool-name">提示</text>
+        <text class="tool-count">×{{tools.hint}}</text>
+      </view>
+    </view>
+    <view wx:else class="tool-btn empty tool-get" bindtap="getToolByAd" data-tool="hint">
+      <text class="tool-icon">📺</text>
+      <view class="tool-info">
+        <text class="tool-name">提示</text>
+        <text class="tool-count">获取</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部原生模板广告（放在文档流中，不覆盖游戏区域） -->
+  <view class="bottom-ad-wrap">
+    <ad-custom unit-id="adunit-3a4d661c81f6ed2f" bindload="adLoad" binderror="adError" bindclose="adClose"></ad-custom>
+  </view>
+
+  <!-- 广告弹窗 -->
+  <view class="ad-mask" wx:if="{{showAdModal}}" catchtouchmove="noop">
+    <view class="ad-modal">
+      <view class="ad-modal-icon">📺</view>
+      <view class="ad-modal-title">获取道具</view>
+      <view class="ad-modal-desc">观看一段广告即可获得 1 个【{{adToolName}}】道具</view>
+      <button class="ad-modal-btn" bindtap="watchAdGetTool">观看广告</button>
+      <view class="ad-modal-cancel" bindtap="closeAdModal">取消</view>
+    </view>
+  </view>
+
+  <!-- 游戏结束弹窗 -->
+  <view class="modal-mask" wx:if="{{showModal}}" catchtouchmove="noop">
+    <view class="modal-box">
+      <view class="modal-emoji">{{isWin ? '🎉' : '😢'}}</view>
+      <view class="modal-title">{{isWin ? '恭喜通关！' : '游戏结束'}}</view>
+      <view class="modal-score">得分：{{score}}</view>
+      <view class="modal-steps">步数：{{steps}}</view>
+      <view class="modal-btns">
+        <button class="modal-btn primary" bindtap="restart">再来一局</button>
+        <button wx:if="{{isWin && mode === 'challenge'}}" class="modal-btn next" bindtap="nextLevel">下一关</button>
+        <button class="modal-btn secondary" bindtap="goHome">返回首页</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Toast -->
+  <view class="toast" wx:if="{{toastMsg}}">{{toastMsg}}</view>
+</view>

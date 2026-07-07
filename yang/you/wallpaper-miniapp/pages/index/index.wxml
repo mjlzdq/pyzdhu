@@ -1,0 +1,78 @@
+<!-- pages/index/index.wxml -->
+<view class="container">
+  <!-- 顶部搜索栏 -->
+  <view class="search-bar" bindtap="goSearch">
+    <view class="search-input">
+      <text class="search-icon">🔍</text>
+      <text class="search-placeholder">搜索壁纸、头像...</text>
+    </view>
+  </view>
+
+  <!-- 分类快捷入口 -->
+  <scroll-view class="category-scroll" scroll-x="true" enhanced show-scrollbar="{{false}}">
+    <view class="category-item {{currentCategory === '' ? 'active' : ''}}" bindtap="switchCategory" data-category="">全部</view>
+    <view class="category-item {{currentCategory === item.name ? 'active' : ''}}" 
+          wx:for="{{categories}}" wx:key="name" 
+          bindtap="switchCategory" data-category="{{item.name}}">
+      {{item.icon}} {{item.name}}
+    </view>
+  </scroll-view>
+
+  <!-- Banner广告位 -->
+  <view class="banner-ad-container" wx:if="{{bannerAdVisible}}">
+    <ad unit-id="{{bannerAdUnitId}}" 
+        ad-type="banner" 
+        ad-theme="black"
+        binderror="onBannerError" 
+        bindload="onBannerLoad">
+    </ad>
+  </view>
+
+  <!-- 瀑布流壁纸列表 -->
+  <view class="waterfall" wx:if="{{wallpapers.length > 0}}">
+    <view class="waterfall-column">
+      <block wx:for="{{leftList}}" wx:key="_id">
+        <view class="wallpaper-card" bindtap="goDetail" data-id="{{item._id}}">
+          <image class="wallpaper-img" src="{{item.thumbUrl || item.url}}" mode="widthFix" lazy-load="{{true}}" style="height: {{item.displayHeight}}px;"></image>
+          <view class="wallpaper-info">
+            <text class="wallpaper-tag">{{item.category}}</text>
+            <view class="wallpaper-actions">
+              <text class="like-count">❤️ {{item.likes || 0}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    <view class="waterfall-column">
+      <block wx:for="{{rightList}}" wx:key="_id">
+        <view class="wallpaper-card" bindtap="goDetail" data-id="{{item._id}}">
+          <image class="wallpaper-img" src="{{item.thumbUrl || item.url}}" mode="widthFix" lazy-load="{{true}}" style="height: {{item.displayHeight}}px;"></image>
+          <view class="wallpaper-info">
+            <text class="wallpaper-tag">{{item.category}}</text>
+            <view class="wallpaper-actions">
+              <text class="like-count">❤️ {{item.likes || 0}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-wrapper" wx:if="{{loading}}">
+    <view class="loading-dot"></view>
+    <view class="loading-dot"></view>
+    <view class="loading-dot"></view>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="load-more" wx:if="{{!loading && wallpapers.length > 0 && noMore}}">
+    <text>— 已经到底了 —</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && wallpapers.length === 0}}">
+    <text class="empty-icon">🖼️</text>
+    <text class="empty-text">暂无壁纸，敬请期待~</text>
+  </view>
+</view>

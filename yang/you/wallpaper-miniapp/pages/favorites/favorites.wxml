@@ -1,0 +1,42 @@
+<!-- pages/favorites/favorites.wxml -->
+<view class="container">
+  <!-- 瀑布流 -->
+  <view class="waterfall" wx:if="{{wallpapers.length > 0}}">
+    <view class="waterfall-column">
+      <block wx:for="{{leftList}}" wx:key="_id">
+        <view class="wallpaper-card" bindtap="goDetail" data-id="{{item._id}}">
+          <image class="wallpaper-img" src="{{item.thumbUrl || item.url}}" mode="widthFix" lazy-load="{{true}}" style="height: {{item.displayHeight}}px;"></image>
+          <view class="wallpaper-info">
+            <text class="wallpaper-tag">{{item.category}}</text>
+            <text class="remove-btn" bindtap="removeFavorite" data-id="{{item._id}}" catchtap="removeFavorite">取消收藏</text>
+          </view>
+        </view>
+      </block>
+    </view>
+    <view class="waterfall-column">
+      <block wx:for="{{rightList}}" wx:key="_id">
+        <view class="wallpaper-card" bindtap="goDetail" data-id="{{item._id}}">
+          <image class="wallpaper-img" src="{{item.thumbUrl || item.url}}" mode="widthFix" lazy-load="{{true}}" style="height: {{item.displayHeight}}px;"></image>
+          <view class="wallpaper-info">
+            <text class="wallpaper-tag">{{item.category}}</text>
+            <text class="remove-btn" bindtap="removeFavorite" data-id="{{item._id}}" catchtap="removeFavorite">取消收藏</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && wallpapers.length === 0}}">
+    <text class="empty-icon">💔</text>
+    <text class="empty-text">还没有收藏壁纸</text>
+    <text class="empty-sub">去发现好看的壁纸吧~</text>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-wrapper" wx:if="{{loading}}">
+    <view class="loading-dot"></view>
+    <view class="loading-dot"></view>
+    <view class="loading-dot"></view>
+  </view>
+</view>

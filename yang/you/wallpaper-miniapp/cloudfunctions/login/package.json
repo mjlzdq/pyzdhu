@@ -1,0 +1,6 @@
+{
+  "name": "login",
+  "version": "1.0.0",
+  "description": "获取用户openId",
+  "main": "index.js"
+}

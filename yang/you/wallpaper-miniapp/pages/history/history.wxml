@@ -1,0 +1,40 @@
+<!-- pages/history/history.wxml -->
+<view class="container">
+  <!-- 操作栏 -->
+  <view class="action-bar" wx:if="{{wallpapers.length > 0}}">
+    <text class="action-clear" bindtap="clearHistory">🗑️ 清空记录</text>
+  </view>
+
+  <!-- 瀑布流 -->
+  <view class="waterfall" wx:if="{{wallpapers.length > 0}}">
+    <view class="waterfall-column">
+      <block wx:for="{{leftList}}" wx:key="_id">
+        <view class="wallpaper-card" bindtap="goDetail" data-id="{{item._id}}">
+          <image class="wallpaper-img" src="{{item.thumbUrl || item.url}}" mode="widthFix" lazy-load="{{true}}" style="height: {{item.displayHeight}}px;"></image>
+          <view class="wallpaper-info">
+            <text class="wallpaper-tag">{{item.category}}</text>
+            <text class="view-time">{{item.viewTime || '刚刚'}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+    <view class="waterfall-column">
+      <block wx:for="{{rightList}}" wx:key="_id">
+        <view class="wallpaper-card" bindtap="goDetail" data-id="{{item._id}}">
+          <image class="wallpaper-img" src="{{item.thumbUrl || item.url}}" mode="widthFix" lazy-load="{{true}}" style="height: {{item.displayHeight}}px;"></image>
+          <view class="wallpaper-info">
+            <text class="wallpaper-tag">{{item.category}}</text>
+            <text class="view-time">{{item.viewTime || '刚刚'}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{wallpapers.length === 0}}">
+    <text class="empty-icon">🕐</text>
+    <text class="empty-text">还没有浏览记录</text>
+    <text class="empty-sub">去看看有什么好看的壁纸吧~</text>
+  </view>
+</view>

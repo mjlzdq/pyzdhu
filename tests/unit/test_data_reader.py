@@ -13,6 +13,9 @@ import pytest
 from common.data_reader import DataReader
 
 
+pytestmark = pytest.mark.unit
+
+
 class TestDataReaderCSV:
     """CSV 读取测试"""
 

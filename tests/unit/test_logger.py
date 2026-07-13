@@ -9,7 +9,12 @@
 """
 import logging
 
+import pytest
+
 from common.logger import get_logger, logger
+
+
+pytestmark = pytest.mark.unit
 
 
 class TestLogger:

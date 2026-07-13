@@ -16,6 +16,9 @@ import pytest
 from common.config_loader import ConfigLoader, config
 
 
+pytestmark = pytest.mark.unit
+
+
 class TestConfigLoaderSingleton:
     """单例模式测试"""
 

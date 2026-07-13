@@ -17,6 +17,9 @@ from common.data_driven import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 # ==================== SoftAssertions ====================
 
 class TestSoftAssertions:

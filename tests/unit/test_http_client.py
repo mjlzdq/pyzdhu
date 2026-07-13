@@ -19,6 +19,9 @@ from common.http_client import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 class TestHttpClientInit:
     """初始化测试"""
 

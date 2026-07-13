@@ -1,4 +1,0 @@
-INFO     AutoTest:test_posts.py:177 测试：获取文章 1 的评论
-INFO     AutoTest:http_client.py:32 [HTTP] GET https://jsonplaceholder.typicode.com/posts/1/comments (attempt 1)
-INFO     AutoTest:http_client.py:36 [HTTP] Response 200 in 0.49s
-INFO     AutoTest:test_posts.py:187 文章 1 有 5 条评论

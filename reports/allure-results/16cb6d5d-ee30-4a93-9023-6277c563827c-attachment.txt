@@ -1,4 +1,0 @@
-2026-06-16 13:47:06 [INFO] AutoTest - 测试：创建文章 - 测试文章标题
-2026-06-16 13:47:06 [INFO] AutoTest - [HTTP] POST https://jsonplaceholder.typicode.com/posts (attempt 1)
-2026-06-16 13:47:06 [INFO] AutoTest - [HTTP] Response 201 in 0.32s
-2026-06-16 13:47:06 [INFO] AutoTest - 创建成功，ID: 101

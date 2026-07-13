@@ -1,4 +1,0 @@
-INFO     AutoTest:test_posts.py:114 测试：部分更新文章 ID=1
-INFO     AutoTest:http_client.py:32 [HTTP] PATCH https://jsonplaceholder.typicode.com/posts/1 (attempt 1)
-INFO     AutoTest:http_client.py:36 [HTTP] Response 200 in 0.32s
-INFO     AutoTest:test_posts.py:121 PATCH 成功: PATCH 更新标题

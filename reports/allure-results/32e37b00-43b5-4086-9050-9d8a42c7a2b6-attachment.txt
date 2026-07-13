@@ -1,4 +1,0 @@
-INFO     AutoTest:test_posts.py:129 测试：删除文章 ID=1
-INFO     AutoTest:http_client.py:32 [HTTP] DELETE https://jsonplaceholder.typicode.com/posts/1 (attempt 1)
-INFO     AutoTest:http_client.py:36 [HTTP] Response 200 in 0.30s
-INFO     AutoTest:test_posts.py:134 删除成功

@@ -55,6 +55,20 @@ run_ui() {
         2>&1 | tee reports/ui_test_output.log
 }
 
+# 运行单元测试
+run_unit() {
+    echo ""
+    echo "=========================================="
+    echo "  运行单元测试 (Unit Tests)"
+    echo "=========================================="
+    echo "  无需网络连接，验证框架自身正确性"
+    echo ""
+    pytest tests/unit/ \
+        -v \
+        --tb=short \
+        2>&1 | tee reports/unit_test_output.log
+}
+
 # 运行冒烟测试
 run_smoke() {
     echo ""
@@ -123,6 +137,9 @@ case "${1:-help}" in
     install)
         install_deps
         ;;
+    unit)
+        run_unit
+        ;;
     api)
         run_api
         ;;
@@ -149,6 +166,7 @@ case "${1:-help}" in
         echo "用法: ./run_tests.sh <命令>"
         echo ""
         echo "运行测试:"
+        echo "  unit         运行单元测试（无需网络）"
         echo "  api          运行接口测试"
         echo "  ui           运行 UI 测试"
         echo "  smoke        运行冒烟测试"

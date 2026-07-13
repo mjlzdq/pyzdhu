@@ -1,4 +1,0 @@
-INFO     AutoTest:test_posts.py:18 测试：获取所有文章
-INFO     AutoTest:http_client.py:32 [HTTP] GET https://jsonplaceholder.typicode.com/posts (attempt 1)
-INFO     AutoTest:http_client.py:36 [HTTP] Response 200 in 2.44s
-INFO     AutoTest:test_posts.py:30 获取到 100 篇文章

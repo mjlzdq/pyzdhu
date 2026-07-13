@@ -1,4 +1,0 @@
-2026-06-16 13:47:08 [INFO] AutoTest - 测试：删除文章 ID=1
-2026-06-16 13:47:08 [INFO] AutoTest - [HTTP] DELETE https://jsonplaceholder.typicode.com/posts/1 (attempt 1)
-2026-06-16 13:47:09 [INFO] AutoTest - [HTTP] Response 200 in 0.30s
-2026-06-16 13:47:09 [INFO] AutoTest - 删除成功

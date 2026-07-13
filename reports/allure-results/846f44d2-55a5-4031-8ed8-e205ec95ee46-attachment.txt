@@ -1,3 +1,0 @@
-2026-06-16 13:47:06 [INFO] AutoTest - 测试：获取不存在的文章
-2026-06-16 13:47:06 [INFO] AutoTest - [HTTP] GET https://jsonplaceholder.typicode.com/posts/99999 (attempt 1)
-2026-06-16 13:47:06 [INFO] AutoTest - [HTTP] Response 404 in 0.22s

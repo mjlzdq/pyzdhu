@@ -1,9 +1,0 @@
-2026-06-16 13:47:09 [INFO] AutoTest - 测试：获取文章 1 的评论
-2026-06-16 13:47:09 [INFO] AutoTest - [HTTP] GET https://jsonplaceholder.typicode.com/posts/1/comments (attempt 1)
-2026-06-16 13:47:10 [INFO] AutoTest - [HTTP] Response 200 in 0.49s
-2026-06-16 13:47:10 [INFO] AutoTest - 文章 1 有 5 条评论
-
-==================================================
- 测试完成
-==================================================
-

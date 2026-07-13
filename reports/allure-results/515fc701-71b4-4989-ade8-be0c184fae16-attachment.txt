@@ -1,3 +1,0 @@
-INFO     AutoTest:test_posts.py:81 测试：创建文章 - body=
-INFO     AutoTest:http_client.py:32 [HTTP] POST https://jsonplaceholder.typicode.com/posts (attempt 1)
-INFO     AutoTest:http_client.py:36 [HTTP] Response 201 in 0.32s

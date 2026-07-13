@@ -119,6 +119,10 @@ class TestSauceDemoNavigation:
         page.locator("#reset_sidebar_link").click()
         logger.info("✓ 已点击 Reset App State")
 
+        # 刷新页面以同步 UI 状态（SauceDemo reset 后按钮不会自动恢复）
+        page.reload()
+        page.wait_for_timeout(300)
+
         # 验证购物车清空
         cart_badge = page.locator(".shopping_cart_badge")
         expect(cart_badge).not_to_be_visible()
@@ -153,9 +157,9 @@ class TestSauceDemoNavigation:
         assert "saucelabs" in href, f"About 链接异常: {href}"
         logger.info(f"✓ About 链接: {href}")
 
-        # 关闭侧边栏
-        page.locator("#react-burger-menu-cross-btn").click()
-        page.wait_for_timeout(300)
+        # 关闭侧边栏（按 ESC）
+        page.keyboard.press("Escape")
+        page.wait_for_timeout(500)
 
         # 验证仍在商品列表页
         expect(page.locator(".title")).to_have_text("Products")
@@ -174,18 +178,14 @@ class TestSauceDemoNavigation:
         page.locator("#react-burger-menu-btn").click()
         page.wait_for_timeout(500)
 
-        # 点击 About - 会在新页面打开
-        with page.expect_popup() as popup_info:
-            page.locator("#about_sidebar_link").click()
-
-        new_page = popup_info.value
-        logger.info(f"✓ 新页面 URL: {new_page.url}")
+        # 点击 About（直接跳转当前页）
+        page.locator("#about_sidebar_link").click()
+        page.wait_for_url("https://saucelabs.com/", timeout=15000, wait_until="domcontentloaded")
+        logger.info(f"✓ 跳转到: {page.url}")
 
         # 验证是 Sauce Labs 官网
-        expect(new_page).to_have_url("https://saucelabs.com/")
+        expect(page).to_have_url("https://saucelabs.com/")
         logger.info("✓ 跳转到 Sauce Labs 官网")
-
-        new_page.close()
 
     @pytest.mark.ui
     def test_social_media_links(self, page):

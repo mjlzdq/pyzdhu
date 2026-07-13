@@ -1,4 +1,0 @@
-2026-06-16 13:47:07 [INFO] AutoTest - 测试：全量更新文章 ID=1
-2026-06-16 13:47:07 [INFO] AutoTest - [HTTP] PUT https://jsonplaceholder.typicode.com/posts/1 (attempt 1)
-2026-06-16 13:47:08 [INFO] AutoTest - [HTTP] Response 200 in 0.76s
-2026-06-16 13:47:08 [INFO] AutoTest - 更新成功: 更新后的标题

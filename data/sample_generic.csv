@@ -1,0 +1,8 @@
+case_id,description,method,path,request_body,params,expected_status,expected_response
+DDT-G01,获取所有文章,GET,/posts,,,200,"{""__is_list"":true,""__list_min"":50,""__not_empty"":true}"
+DDT-G02,获取单篇文章ID=1,GET,/posts/1,,,200,"{""id"":1,""userId"":1}"
+DDT-G03,按userId筛选文章,GET,/posts,,{""userId"":1},200,"{""__is_list"":true,""__not_empty"":true}"
+DDT-G04,创建新文章,POST,/posts,"{""title"":""通用DDT测试"",""body"":""通用模式创建"",""userId"":1}",,201,"{""title"":""通用DDT测试"",""userId"":1}"
+DDT-G05,更新文章,PUT,/posts/1,"{""id"":1,""title"":""PUT更新"",""body"":""更新内容"",""userId"":1}",,200,"{""title"":""PUT更新""}"
+DDT-G06,部分更新文章,PATCH,/posts/1,"{""title"":""PATCH更新""}",,200,"{""title"":""PATCH更新""}"
+DDT-G07,获取不存在的文章（故意填错状态码验证失败反馈）,GET,/posts/99999,,,200,"{""__is_list"":true}"

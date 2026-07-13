@@ -1,0 +1,6 @@
+case_id,description,title,body,userId,expected_status,expected_title,expected_userId,expect_fail
+DDT-001,正常创建文章,数据驱动测试标题A,这是数据驱动测试内容A,1,201,数据驱动测试标题A,1,
+DDT-002,创建英文标题文章,Data Driven Test Title B,This is body content B,2,201,Data Driven Test Title B,2,
+DDT-003,创建带特殊字符标题,测试-标题_#001,内容包含中文English123,3,201,测试-标题_#001,3,
+DDT-004,创建长标题文章,,长内容文章正文部分用于测试数据驱动框架的数据读取和执行能力,5,201,,5,
+DDT-005,故意填错期望标题验证失败反馈,DDT错误标题,错误内容,1,201,DDT不匹配标题,1,true

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 测试报告 / 输出
+reports/html/
+reports/allure-results/
+reports/allure-report/
+reports/screenshots/
+reports/*.log
+reports/*.txt
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 环境
+.env
+venv/
+.venv/
+
+# CodeBuddy（内部数据，非项目代码）
+.codebuddy/teams/

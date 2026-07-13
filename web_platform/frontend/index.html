@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>接口批量测试平台</title>
+<link rel="stylesheet" href="/static/tailwind-local.css?v=5">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Design System Variables */
+:root {
+  --primary: #2563EB;
+  --primary-light: #3B82F6;
+  --primary-dark: #1D4ED8;
+  --accent: #6366F1;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --bg: #F0F4FF;
+  --bg-card: rgba(255,255,255,0.72);
+  --text: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --border: rgba(226,232,240,0.8);
+  --border-focus: #93C5FD;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow: 0 4px 16px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+}
+
+* { font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+
+body {
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 25%, #F0F4FF 50%, #E8F0FE 75%, #EFF6FF 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Animated background orbs */
+body::before {
+  content: '';
+  position: fixed; top: -20%; right: -10%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; bottom: -15%; left: -10%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(37,99,235,0.05) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none; z-index: 0;
+}
+
+/* Glass card */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* Tab buttons */
+.tab-btn {
+  position: relative;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+.tab-btn:hover { color: var(--text-secondary); }
+.tab-active {
+  color: var(--primary);
+  font-weight: 600;
+}
+.tab-active::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+  width: 32px; height: 3px;
+  background: var(--primary); border-radius: 3px 3px 0 0;
+}
+
+/* Input & Select */
+.input-field {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.input-field:hover { border-color: rgba(148,163,184,0.5); }
+.input-field:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1), var(--shadow-sm);
+  background: white;
+}
+.input-field::placeholder { color: var(--text-muted); }
+.input-field.mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13.5px; }
+
+textarea.input-field {
+  resize: vertical;
+  line-height: 1.65;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 24px;
+  font-size: 14px; font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary {
+  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 16px rgba(37,99,235,0.4);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-ghost {
+  background: rgba(241,245,249,0.8);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: rgba(226,232,240,0.8); color: var(--text); }
+
+/* Tag / badge */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 6px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+}
+
+/* Scrollbar */
+.scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+.scrollbar::-webkit-scrollbar-track { background: transparent; }
+.scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.3); border-radius: 10px; }
+.scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.5); }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: calc(200px + 100%) 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-fade { animation: fadeIn 0.35s ease-out; }
+.animate-slide { animation: slideUp 0.4s ease-out; }
+.drag-active { border-color: var(--primary) !important; background: rgba(37,99,235,0.06) !important; }
+
+/* Terminal result */
+.terminal {
+  background: #0B1120;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.terminal-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+.terminal-body {
+  padding: 16px 20px; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px; line-height: 1.7; color: #A5D6FF;
+  white-space: pre-wrap; word-break: break-all;
+  max-height: 540px; overflow-y: auto;
+}
+
+/* Result cards (non-tester) */
+.stat-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+/* Status dots */
+.status-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Select dropdown */
+select.input-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* Overview stats bar */
+.stat-bar {
+  display: flex; gap: 4px; align-items: center;
+  padding: 6px 12px; border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+}
+
+/* Dropdown details (placeholder picker) */
+details > summary { list-style: none; cursor: pointer; user-select: none; }
+details > summary::-webkit-details-marker { display: none; }
+
+@media (max-width: 768px) {
+  .stat-grid-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header style="position:sticky;top:0;z-index:50;background:linear-gradient(135deg,rgba(30,58,138,0.95) 0%,rgba(49,46,129,0.95) 100%);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);">
+  <div class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div style="width:34px;height:34px;background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-white tracking-tight leading-tight">接口批量测试平台</h1>
+        <p class="text-[11px] text-blue-200/70 leading-tight">API Batch Testing Platform</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-[11px] text-blue-200/60 bg-white/8 px-2.5 py-1 rounded-full">v2.0</span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== NAV TABS ===== -->
+<nav style="position:sticky;top:65px;z-index:40;background:rgba(255,255,255,0.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(226,232,240,0.6);">
+  <div class="max-w-6xl mx-auto flex">
+    <button onclick="switchTab('template')" id="tab-template" class="tab-btn tab-active px-6 py-3.5 flex items-center gap-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      测试模板
+    </button>
+    <button onclick="switchTab('run')" id="tab-run" class="tab-btn px-6 py-3.5 flex items-center gap-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      运行测试
+    </button>
+    <button onclick="switchTab('debug')" id="tab-debug" class="tab-btn px-6 py-3.5 flex items-center gap-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      接口调试
+    </button>
+  </div>
+</nav>
+
+<!-- ==================== TAB 1: 测试模板 ==================== -->
+<main id="panel-template" class="max-w-4xl mx-auto p-6 animate-fade" style="position:relative;z-index:1;">
+
+  <!-- 已有模板列表 -->
+  <div class="glass-card rounded-2xl p-5 mb-4" id="tplListSection">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <div style="width:4px;height:20px;background:var(--primary);border-radius:2px;"></div>
+        <h2 class="text-[13px] font-semibold text-slate-600">已有模板</h2>
+        <span id="tplCount" class="text-[11px] text-slate-400 ml-1"></span>
+      </div>
+      <button onclick="newTemplate()" class="btn btn-primary px-4 py-2 text-xs">+ 新建模板</button>
+    </div>
+    <div id="tplList" class="divide-y scrollbar" style="max-height:300px;overflow-y:auto;border-color:rgba(226,232,240,0.4);">
+      <div class="text-xs text-slate-300 py-6 text-center">暂无模板，点击「新建模板」创建</div>
+    </div>
+  </div>
+
+  <div class="glass-card rounded-2xl p-6 space-y-5" id="tplFormSection">
+    <!-- Section Header -->
+    <div class="flex items-center justify-between mb-1">
+      <div class="flex items-center gap-2">
+        <div style="width:4px;height:20px;background:var(--accent);border-radius:2px;"></div>
+        <h2 class="text-sm font-semibold text-slate-700" id="tplFormTitle">新建模板</h2>
+      </div>
+      <span id="tplEditBadge" class="hidden tag" style="background:rgba(99,102,241,0.1);color:#6366F1;">编辑中</span>
+    </div>
+
+    <!-- 名称 -->
+    <div>
+      <label class="block text-[13px] font-medium text-slate-600 mb-2">模板名称 <span class="text-red-400">*</span></label>
+      <input id="tplName" type="text" placeholder="例如：用户登录接口" class="input-field monospace">
+    </div>
+
+    <!-- Method + URL -->
+    <div class="grid grid-cols-5 gap-3">
+      <div>
+        <label class="block text-[13px] font-medium text-slate-600 mb-2">方法</label>
+        <select id="tplMethod" class="input-field monospace">
+          <option value="GET">GET</option>
+          <option value="POST" selected>POST</option>
+          <option value="PUT">PUT</option>
+          <option value="PATCH">PATCH</option>
+          <option value="DELETE">DELETE</option>
+        </select>
+      </div>
+      <div class="col-span-4">
+        <label class="block text-[13px] font-medium text-slate-600 mb-2">
+          URL
+          <span class="text-slate-400 font-normal text-xs ml-1">（可用 <code class="bg-slate-100 px-1 py-0.5 rounded text-purple-600 text-[11px] font-mono">{"{{列名}}"}</code> 引用数据列）</span>
+        </label>
+        <input id="tplUrl" type="text" placeholder="https://example.com/api/users/{{id}}" class="input-field">
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <label class="text-[13px] font-medium text-slate-600">
+          请求体 JSON
+          <span class="text-slate-400 font-normal text-xs ml-1">（<code class="bg-slate-100 px-1 py-0.5 rounded text-purple-600 text-[11px] font-mono">{"{{列名}}"}</code> 引用数据列）</span>
+        </label>
+        <div class="flex gap-1.5">
+          <button onclick="formatField('tplBody')" class="btn-ghost px-2.5 py-1 text-[11px] rounded-lg">格式化</button>
+          <details class="relative">
+            <summary class="px-2.5 py-1 text-[11px] rounded-lg cursor-pointer" style="background:rgba(147,51,234,0.08);color:#7C3AED;">内置占位符 ▾</summary>
+            <div class="absolute right-0 mt-2 p-3 glass-card rounded-xl z-20 w-[280px] grid grid-cols-2 gap-1 text-[11px] shadow-lg">
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{uuid}}')">{{uuid}}</span>
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{timestamp}}')">{{timestamp}}</span>
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{now}}')">{{now}}</span>
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{date}}')">{{date}}</span>
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{random_int}}')">{{random_int}}</span>
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{random_str}}')">{{random_str}}</span>
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{faker_email}}')">{{faker_email}}</span>
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{faker_name}}')">{{faker_name}}</span>
+              <span class="px-2 py-1.5 rounded-lg font-mono cursor-pointer hover:bg-purple-50 text-purple-600 transition-colors" onclick="insertAt('tplBody','{{faker_phone}}')">{{faker_phone}}</span>
+            </div>
+          </details>
+        </div>
+      </div>
+      <textarea id="tplBody" rows="8" spellcheck="false"
+        placeholder='{"username": "{{name}}", "email": "{{email}}"}'
+        class="input-field monospace"></textarea>
+    </div>
+
+    <!-- Headers -->
+    <div>
+      <label class="block text-[13px] font-medium text-slate-600 mb-2">自定义 Headers（JSON）</label>
+      <textarea id="tplHeaders" rows="3" spellcheck="false"
+        placeholder='{"Authorization": "Bearer {{token}}"}'
+        class="input-field monospace"></textarea>
+    </div>
+
+    <!-- Row: Mode + Cookie + Timeout -->
+    <div class="grid grid-cols-3 gap-3">
+      <div>
+        <label class="block text-[13px] font-medium text-slate-600 mb-2">目标用户 <span class="text-red-400">*</span></label>
+        <select id="tplMode" class="input-field" onchange="toggleColumnDesc()">
+          <option value="tester" selected>测试人员</option>
+          <option value="non_tester">非测试人员</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[13px] font-medium text-slate-600 mb-2">Cookie</label>
+        <input id="tplCookie" type="text" placeholder="TOKEN=xxx" class="input-field">
+      </div>
+      <div>
+        <label class="block text-[13px] font-medium text-slate-600 mb-2">超时（秒）</label>
+        <input id="tplTimeout" type="number" value="30" min="1" max="120" class="input-field">
+      </div>
+    </div>
+
+    <!-- 列说明 -->
+    <div id="tplColumnDescWrapper" class="hidden">
+      <label class="block text-[13px] font-medium text-slate-600 mb-2">
+        数据列说明
+        <span class="text-slate-400 font-normal text-xs ml-1">（非测试人员需要知道每列填什么）</span>
+      </label>
+      <textarea id="tplColumnDesc" rows="3" spellcheck="false"
+        placeholder="例如：&#10;name：用户姓名（必填）&#10;email：邮箱地址（必填）&#10;age：年龄（选填，默认18）"
+        class="input-field"></textarea>
+    </div>
+
+    <!-- 结果分组配置 -->
+    <div>
+      <label class="block text-[13px] font-medium text-slate-600 mb-2">
+        结果分组字段
+        <span class="text-slate-400 font-normal text-xs ml-1">（逗号分隔的 CSV 列名，用于按这些字段分组展示通过/失败结果）</span>
+      </label>
+      <input id="tplGroupKeys" type="text" placeholder="projectName,testOperNames,code" class="input-field mono">
+    </div>
+
+    <!-- Save -->
+    <div class="flex items-center gap-4 pt-1">
+      <button onclick="saveTemplate()" class="btn btn-primary px-10" id="tplSaveBtn">保存模板</button>
+      <button onclick="cancelEdit()" class="btn-ghost px-6 hidden" id="tplCancelBtn">取消编辑</button>
+      <span id="tplMsg" class="text-[13px]"></span>
+    </div>
+  </div>
+</main>
+
+<!-- ==================== TAB 2: 运行测试 ==================== -->
+<main id="panel-run" class="max-w-5xl mx-auto p-6 animate-fade hidden" style="position:relative;z-index:1;">
+
+  <!-- 选择模板 -->
+  <div class="glass-card rounded-2xl p-5 mb-4">
+    <div class="flex items-center gap-4">
+      <div style="width:4px;height:20px;background:var(--success);border-radius:2px;" class="shrink-0"></div>
+      <label class="text-[13px] font-semibold text-slate-600 shrink-0">选择模板</label>
+      <select id="runTemplateSelect" onchange="onRunTemplateChange()" class="input-field flex-1">
+        <option value="">-- 请先在「测试模板」页保存模板 --</option>
+      </select>
+    </div>
+    <div id="runTemplateInfo" class="hidden mt-3 rounded-xl text-xs" style="background:rgba(37,99,235,0.04);padding:12px 16px;border:1px solid rgba(37,99,235,0.1);"></div>
+  </div>
+
+  <!-- ===== 模式A：测试人员 ===== -->
+  <div id="runTesterMode" class="hidden space-y-4">
+
+    <!-- 数据文件 -->
+    <div class="glass-card rounded-2xl p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        <h3 class="text-[13px] font-semibold text-slate-600">测试数据</h3>
+      </div>
+
+      <div id="dataDropZone" class="rounded-2xl p-12 text-center cursor-pointer transition-all duration-200" style="border:2px dashed rgba(203,213,225,0.6);background:rgba(255,255,255,0.4);">
+        <div class="mx-auto mb-4 flex items-center justify-center" style="width:52px;height:52px;background:rgba(37,99,235,0.06);border-radius:16px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <p class="text-sm text-slate-600 font-medium mb-1">拖拽文件或 <span class="text-blue-600">点击上传</span></p>
+        <p class="text-xs text-slate-400">支持 <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono text-[11px]">.csv</code> 和 <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono text-[11px]">.xlsx</code></p>
+        <input id="dataFileInput" type="file" accept=".csv,.xlsx" class="hidden">
+      </div>
+
+      <div id="dataFileInfo" class="hidden mt-4 rounded-xl flex items-center gap-3" style="padding:12px 16px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+        <span id="dataFileName" class="text-sm font-semibold" style="color:#065F46;"></span>
+        <span id="dataFileCount" class="text-xs ml-auto" style="color:#047857;"></span>
+      </div>
+
+      <div id="dataPreview" class="hidden mt-4">
+        <h4 class="text-[12px] font-medium text-slate-500 mb-2">数据预览</h4>
+        <div id="dataPreviewTable" class="overflow-x-auto scrollbar rounded-xl" style="border:1px solid var(--border);max-height:260px;"></div>
+      </div>
+    </div>
+
+    <!-- 执行 -->
+    <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+      <button id="runBtn" onclick="runTests()" class="btn btn-primary px-10">
+        <svg id="runIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        开始测试
+      </button>
+      <span id="runStatus" class="text-[13px] text-slate-500"></span>
+      <div id="runProgress" class="hidden flex-1">
+        <div class="w-full rounded-full h-2" style="background:rgba(203,213,225,0.4);overflow:hidden;">
+          <div id="progressBar" class="h-full rounded-full transition-all duration-300" style="width:0%;background:linear-gradient(90deg,#2563EB,#6366F1);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 结果 -->
+    <div id="resultArea" class="hidden terminal animate-slide">
+      <div class="terminal-header">
+        <div class="terminal-dot" style="background:#EF4444;"></div>
+        <div class="terminal-dot" style="background:#F59E0B;"></div>
+        <div class="terminal-dot" style="background:#10B981;"></div>
+        <span class="text-[11px] text-slate-500 ml-3 font-mono">test-results</span>
+      </div>
+      <pre id="resultText" class="terminal-body"></pre>
+    </div>
+
+    <!-- 分组结果展示 -->
+    <div id="groupedResultArea" class="hidden space-y-4 animate-slide"></div>
+  </div>
+
+  <!-- ===== 模式B：非测试人员 ===== -->
+  <div id="runNonTesterMode" class="hidden space-y-4">
+
+    <!-- 填写指引 -->
+    <div id="runColumnGuide" class="hidden glass-card rounded-2xl p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <h3 class="text-[13px] font-semibold text-slate-600">数据填写说明</h3>
+      </div>
+      <pre id="runColumnDescText" class="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed rounded-xl p-4" style="background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1);"></pre>
+    </div>
+
+    <!-- 上传区 -->
+    <div class="glass-card rounded-2xl p-8 text-center">
+      <div id="ntDataDropZone" class="rounded-2xl p-14 cursor-pointer transition-all duration-200" style="border:2px dashed rgba(203,213,225,0.5);background:rgba(255,255,255,0.35);">
+        <div class="mx-auto mb-5 flex items-center justify-center" style="width:64px;height:64px;background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(5,150,105,0.08));border-radius:20px;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <p class="text-base font-bold text-slate-700 mb-1.5">上传测试数据文件</p>
+        <p class="text-sm text-slate-400 mb-1">点击此处或将文件拖拽到此处</p>
+        <p class="text-xs text-slate-300">支持 <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-400 font-mono text-[11px]">.csv</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-400 font-mono text-[11px]">.xlsx</code> 格式</p>
+        <input id="ntDataFileInput" type="file" accept=".csv,.xlsx" class="hidden">
+      </div>
+
+      <div id="ntDataFileInfo" class="hidden mt-4 rounded-2xl flex items-center gap-3" style="padding:14px 20px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.15);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+        <div>
+          <span id="ntDataFileName" class="text-sm font-bold" style="color:#065F46;"></span>
+          <span id="ntDataFileCount" class="text-xs ml-2" style="color:#047857;"></span>
+        </div>
+        <button onclick="resetNTFile()" class="btn-ghost px-3 py-1.5 text-xs ml-auto">重新上传</button>
+      </div>
+    </div>
+
+    <!-- 执行按钮 -->
+    <div class="glass-card rounded-2xl p-6 text-center">
+      <button id="ntRunBtn" onclick="runTests()" class="btn-primary px-20 py-4 text-lg font-bold rounded-2xl" style="background:linear-gradient(135deg,#059669,#10B981);box-shadow:0 4px 20px rgba(16,185,129,0.3);">
+        <svg id="ntRunIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        开始测试
+      </button>
+      <p id="ntRunHint" class="text-[13px] text-slate-400 mt-3">请先上传测试数据文件</p>
+      <div id="ntRunProgress" class="hidden mt-4 max-w-sm mx-auto">
+        <div class="w-full rounded-full h-3" style="background:rgba(203,213,225,0.4);overflow:hidden;">
+          <div id="ntProgressBar" class="h-full rounded-full transition-all duration-300" style="width:0%;background:linear-gradient(90deg,#059669,#10B981);"></div>
+        </div>
+        <p id="ntRunStatus" class="text-sm text-slate-500 mt-2"></p>
+      </div>
+    </div>
+
+    <!-- 结果 -->
+    <div id="ntResultArea" class="hidden space-y-4 animate-slide">
+      <div class="grid grid-cols-3 gap-4">
+        <div class="stat-card">
+          <div id="ntTotalCount" class="text-4xl font-extrabold text-slate-700">0</div>
+          <div class="text-[12px] text-slate-400 mt-1.5 font-medium">总测试数</div>
+        </div>
+        <div class="stat-card">
+          <div id="ntSuccessCount" class="text-4xl font-extrabold" style="color:#10B981;">0</div>
+          <div class="text-[12px] text-slate-400 mt-1.5 font-medium">通过</div>
+        </div>
+        <div class="stat-card">
+          <div id="ntFailCount" class="text-4xl font-extrabold text-red-400">0</div>
+          <div class="text-[12px] text-slate-400 mt-1.5 font-medium">未通过</div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[13px] font-semibold text-slate-600">通过率</span>
+          <span id="ntPassRate" class="text-sm font-bold" style="color:#10B981;">0%</span>
+        </div>
+        <div class="w-full rounded-full h-3" style="background:rgba(203,213,225,0.4);overflow:hidden;">
+          <div id="ntPassBar" class="h-full rounded-full transition-all duration-700 ease-out" style="width:0%;background:linear-gradient(90deg,#10B981,#34D399);"></div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="flex items-center gap-2 px-5 py-3.5" style="border-bottom:1px solid var(--border);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <h3 class="text-[13px] font-semibold text-slate-600">测试详情</h3>
+        </div>
+      <div id="ntResultList" class="divide-y scrollbar" style="max-height:380px;overflow-y:auto;border-color:rgba(226,232,240,0.5);"></div>
+    </div>
+
+    <!-- 分组结果 -->
+    <div id="ntGroupedResultArea" class="hidden space-y-4 animate-slide"></div>
+  </div>
+  </div>
+</main>
+
+<!-- ==================== TAB 3: 接口调试 ==================== -->
+<main id="panel-debug" class="max-w-5xl mx-auto p-6 animate-fade hidden" style="position:relative;z-index:1;">
+
+  <div class="flex gap-5">
+    <!-- 左侧：请求配置 -->
+    <div class="flex-1 min-w-0 space-y-4">
+
+      <!-- 请求栏 -->
+      <div class="glass-card rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <div style="width:4px;height:20px;background:var(--accent);border-radius:2px;"></div>
+          <h2 class="text-[13px] font-semibold text-slate-600">请求配置</h2>
+        </div>
+
+        <div class="flex gap-2">
+          <select id="dbgMethod" class="input-field" style="width:120px;flex-shrink:0;" onchange="onDbgMethodChange()">
+            <option value="GET">GET</option>
+            <option value="POST" selected>POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+            <option value="DELETE">DELETE</option>
+            <option value="HEAD">HEAD</option>
+            <option value="OPTIONS">OPTIONS</option>
+          </select>
+          <input id="dbgUrl" type="text" placeholder="https://httpbin.org/post" class="input-field flex-1 mono" autocomplete="off">
+          <button onclick="sendDebugRequest()" class="btn btn-primary px-8" id="dbgSendBtn">
+            <svg id="dbgSendIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            发送
+          </button>
+        </div>
+      </div>
+
+      <!-- Headers -->
+      <div class="glass-card rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-[13px] font-semibold text-slate-600 flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            Headers
+          </h3>
+          <button onclick="addDbgHeader()" class="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors">+ 添加</button>
+        </div>
+        <div id="dbgHeadersList" class="space-y-2">
+          <div class="flex gap-2 items-center header-row">
+            <input type="text" value="Content-Type" placeholder="Key" class="input-field flex-1 mono text-xs py-2">
+            <input type="text" value="application/json" placeholder="Value" class="input-field flex-1 mono text-xs py-2">
+            <button onclick="removeDbgHeader(this)" class="text-slate-300 hover:text-red-400 transition-colors shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="glass-card rounded-2xl p-5" id="dbgBodySection">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-[13px] font-semibold text-slate-600 flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            请求体
+          </h3>
+          <button onclick="formatField('dbgBody')" class="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors">格式化</button>
+        </div>
+        <textarea id="dbgBody" rows="10" spellcheck="false" placeholder='{"key": "value"}'
+          class="input-field mono"></textarea>
+      </div>
+
+      <!-- 设置 -->
+      <div class="glass-card rounded-2xl p-5">
+        <h3 class="text-[13px] font-semibold text-slate-600 mb-3 flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          高级设置
+        </h3>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-medium text-slate-500 mb-1.5">超时（秒）</label>
+            <input id="dbgTimeout" type="number" value="30" min="1" max="300" class="input-field">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-500 mb-1.5">重试次数</label>
+            <input id="dbgRetry" type="number" value="3" min="0" max="10" class="input-field">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-500 mb-1.5">重试延迟（秒）</label>
+            <input id="dbgRetryDelay" type="number" value="1" min="0.1" max="10" step="0.1" class="input-field">
+          </div>
+        </div>
+      </div>
+
+      <!-- 请求历史 -->
+      <div class="glass-card rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-[13px] font-semibold text-slate-600 flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            请求历史
+          </h3>
+          <button onclick="clearDbgHistory()" class="text-[11px] text-slate-400 hover:text-red-400 transition-colors">清空</button>
+        </div>
+        <div id="dbgHistory" class="space-y-1 max-h-60 overflow-y-auto scrollbar">
+          <div class="text-xs text-slate-300 py-4 text-center">发送请求后显示历史</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：响应面板 -->
+    <div class="flex-1 min-w-0 space-y-4">
+      <div class="glass-card rounded-2xl p-5" style="position:sticky;top:130px;">
+        <div class="flex items-center gap-2 mb-4">
+          <div style="width:4px;height:20px;background:var(--success);border-radius:2px;"></div>
+          <h2 class="text-[13px] font-semibold text-slate-600">响应</h2>
+          <div id="dbgStatusTag" class="hidden"></div>
+          <span id="dbgTiming" class="text-xs text-slate-400 ml-auto hidden"></span>
+        </div>
+
+        <div id="dbgResponsePlaceholder" class="py-16 text-center">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(148,163,184,0.4)" stroke-width="1.2" class="mx-auto mb-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <p class="text-sm text-slate-300">点击「发送」查看响应</p>
+        </div>
+
+        <div id="dbgResponseContent" class="hidden">
+          <!-- 重试记录 -->
+          <div id="dbgRetryInfo" class="hidden rounded-xl mb-4" style="padding:10px 14px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);">
+            <span class="text-xs text-amber-600 font-medium">⚠ 触发了重试机制</span>
+          </div>
+
+          <!-- 重试详情 -->
+          <div id="dbgAttempts" class="hidden mb-3">
+            <h4 class="text-[11px] font-medium text-slate-500 mb-1.5">尝试记录</h4>
+            <div id="dbgAttemptsList" class="space-y-1"></div>
+          </div>
+
+          <!-- Response Headers -->
+          <details class="mb-3">
+            <summary class="text-[11px] font-medium text-slate-500 cursor-pointer hover:text-slate-700 transition-colors">响应头 ▾</summary>
+            <pre id="dbgRespHeaders" class="mt-2 text-[11px] font-mono text-slate-600 rounded-xl p-3 overflow-x-auto" style="background:rgba(241,245,249,0.6);max-height:200px;overflow-y:auto;"></pre>
+          </details>
+
+          <!-- Response Body -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-medium text-slate-500">响应体</span>
+              <div class="flex items-center gap-2">
+                <span id="dbgBodySize" class="text-[10px] text-slate-400"></span>
+                <button onclick="copyDbgResponse()" class="text-[10px] font-medium text-indigo-600 hover:text-indigo-800 transition-colors">复制</button>
+              </div>
+            </div>
+            <pre id="dbgRespBody" class="font-mono text-[13px] rounded-xl p-4 overflow-x-auto scrollbar" style="background:#0B1120;color:#A5D6FF;line-height:1.6;max-height:420px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ===== Tab =====
+function switchTab(tab) {
+  const panels = { template: 'panel-template', run: 'panel-run', debug: 'panel-debug' };
+  const tabs = { template: 'tab-template', run: 'tab-run', debug: 'tab-debug' };
+  Object.entries(panels).forEach(([k, v]) => document.getElementById(v).classList.toggle('hidden', k !== tab));
+  Object.entries(tabs).forEach(([k, v]) => {
+    const el = document.getElementById(v);
+    if (k === tab) el.classList.add('tab-active');
+    else el.classList.remove('tab-active');
+  });
+  if (tab === 'template') { loadLastTemplate(); renderTplList(); }
+  if (tab === 'run') refreshRunTemplateList();
+  if (tab === 'debug') loadDbgHistory();
+}
+
+// ===== Storage =====
+const TPL_KEY = 'api_test_templates';
+let tplEditingId = null; // 正在编辑的模板 ID
+
+function getTemplates(){try{return JSON.parse(localStorage.getItem(TPL_KEY))||[]}catch{return[]}}
+function setTemplates(l){localStorage.setItem(TPL_KEY,JSON.stringify(l))}
+
+// ===== Template List =====
+function renderTplList(){
+  const list=getTemplates();
+  const container=document.getElementById('tplList');
+  const count=document.getElementById('tplCount');
+  count.textContent=list.length?`(${list.length})`:'';
+  if(list.length===0){
+    container.innerHTML='<div class="text-xs text-slate-300 py-6 text-center">暂无模板，点击「新建模板」创建</div>';
+    return;
+  }
+  const colors={GET:'#3B82F6',POST:'#10B981',PUT:'#F59E0B',PATCH:'#8B5CF6',DELETE:'#EF4444'};
+  container.innerHTML=list.map(t=>{
+    const keys=(t.result_group_keys||'').split(',').map(s=>s.trim()).filter(Boolean);
+    return`<div class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50/60 transition-colors cursor-pointer" onclick="editTemplate('${t.id}')">
+      <span class="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded-md shrink-0" style="background:${colors[t.method]||'#6B7280'}15;color:${colors[t.method]||'#6B7280'};">${t.method}</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium text-slate-700 truncate">${escHtml(t.name||'未命名')}</div>
+        <div class="text-[11px] text-slate-400 truncate mt-0.5">${escHtml((t.url||'').substring(0,60))}</div>
+        ${keys.length>0?`<div class="text-[10px] text-indigo-400 mt-0.5">分组: ${keys.join(' / ')}</div>`:''}
+      </div>
+      <span class="text-[10px] text-slate-300 shrink-0">${t.mode==='non_tester'?'用户':'技术'}</span>
+      <button onclick="event.stopPropagation();deleteTemplate('${t.id}')" class="text-slate-300 hover:text-red-400 transition-colors shrink-0 px-1" title="删除">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function newTemplate(){
+  tplEditingId=null;
+  clearTplForm();
+  document.getElementById('tplFormTitle').textContent='新建模板';
+  document.getElementById('tplSaveBtn').textContent='保存模板';
+  document.getElementById('tplEditBadge').classList.add('hidden');
+  document.getElementById('tplCancelBtn').classList.add('hidden');
+}
+
+function editTemplate(id){
+  const t=getTemplates().find(x=>String(x.id)===String(id));
+  if(!t)return;
+  tplEditingId=id;
+  document.getElementById('tplName').value=t.name||'';
+  document.getElementById('tplMethod').value=t.method||'POST';
+  document.getElementById('tplUrl').value=t.url||'';
+  document.getElementById('tplBody').value=t.body||'';
+  document.getElementById('tplHeaders').value=t.headers||'';
+  document.getElementById('tplCookie').value=t.cookie||'';
+  document.getElementById('tplTimeout').value=t.timeout||30;
+  document.getElementById('tplMode').value=t.mode||'tester';
+  document.getElementById('tplColumnDesc').value=t.column_desc||'';
+  document.getElementById('tplGroupKeys').value=t.result_group_keys||'';
+  toggleColumnDesc();
+  document.getElementById('tplFormTitle').textContent='编辑模板';
+  document.getElementById('tplSaveBtn').textContent='更新模板';
+  document.getElementById('tplEditBadge').classList.remove('hidden');
+  document.getElementById('tplCancelBtn').classList.remove('hidden');
+  document.getElementById('tplFormSection').scrollIntoView({behavior:'smooth'});
+}
+
+function cancelEdit(){
+  newTemplate();
+}
+
+function deleteTemplate(id){
+  const list=getTemplates().filter(x=>String(x.id)!==String(id));
+  setTemplates(list);
+  if(tplEditingId===id)newTemplate();
+  renderTplList();
+  refreshRunTemplateList();
+}
+
+function clearTplForm(){
+  document.getElementById('tplName').value='';
+  document.getElementById('tplMethod').value='POST';
+  document.getElementById('tplUrl').value='';
+  document.getElementById('tplBody').value='';
+  document.getElementById('tplHeaders').value='';
+  document.getElementById('tplCookie').value='';
+  document.getElementById('tplTimeout').value='30';
+  document.getElementById('tplMode').value='tester';
+  document.getElementById('tplColumnDesc').value='';
+  document.getElementById('tplGroupKeys').value='';
+  toggleColumnDesc();
+}
+
+// ===== Template Form =====
+function loadLastTemplate(){
+  const list=getTemplates();
+  if(list.length>0){
+    const t=list[list.length-1];
+    editTemplate(t.id);
+  }
+}
+
+function toggleColumnDesc(){
+  document.getElementById('tplColumnDescWrapper').classList.toggle('hidden',document.getElementById('tplMode').value==='tester');
+}
+
+function collectTemplate(){
+  return{
+    id:tplEditingId||Date.now().toString(),
+    name:document.getElementById('tplName').value.trim(),
+    method:document.getElementById('tplMethod').value,
+    url:document.getElementById('tplUrl').value.trim(),
+    body:document.getElementById('tplBody').value.trim(),
+    headers:document.getElementById('tplHeaders').value.trim(),
+    cookie:document.getElementById('tplCookie').value.trim(),
+    timeout:parseInt(document.getElementById('tplTimeout').value)||30,
+    mode:document.getElementById('tplMode').value,
+    column_desc:document.getElementById('tplColumnDesc').value.trim(),
+    result_group_keys:document.getElementById('tplGroupKeys').value.trim(),
+    updatedAt:new Date().toISOString(),
+  };
+}
+
+function saveTemplate(){
+  const t=collectTemplate();
+  if(!t.name){msg('tplMsg','请输入模板名称','red');return}
+  if(!t.url){msg('tplMsg','请输入 URL','red');return}
+  if(t.body){try{JSON.parse(t.body)}catch(e){msg('tplMsg','JSON 格式错误: '+e.message,'red');return}}
+  if(t.headers){try{JSON.parse(t.headers)}catch(e){msg('tplMsg','Headers JSON 格式错误: '+e.message,'red');return}}
+
+  const list=getTemplates();
+  if(tplEditingId){
+    // 更新现有模板
+    const idx=list.findIndex(x=>String(x.id)===String(tplEditingId));
+    if(idx>=0){
+      t.createdAt=list[idx].createdAt||t.updatedAt;
+      list[idx]=t;
+      setTemplates(list);
+      msg('tplMsg','✓ 模板已更新','green');
+    }
+  }else{
+    // 新建模板
+    t.createdAt=t.updatedAt;
+    list.push(t);
+    setTemplates(list);
+    msg('tplMsg','✓ 模板已保存','green');
+    // 新建后清空编辑
+    newTemplate();
+  }
+  renderTplList();
+  refreshRunTemplateList();
+}
+
+function formatField(id){const ta=document.getElementById(id);try{ta.value=JSON.stringify(JSON.parse(ta.value),null,2)}catch{}}
+function msg(elId,text,color){
+  const el=document.getElementById(elId);el.textContent=text;
+  el.className='text-[13px] '+(color==='red'?'text-red-500':'text-emerald-600');
+  setTimeout(()=>{el.textContent=''},3000);
+}
+function insertAt(elId,text){
+  const ta=document.getElementById(elId),s=ta.selectionStart;
+  ta.value=ta.value.slice(0,s)+text+ta.value.slice(ta.selectionEnd);
+  ta.focus();ta.selectionStart=ta.selectionEnd=s+text.length;
+}
+
+// ===== Run Tab =====
+function refreshRunTemplateList(){
+  const sel=document.getElementById('runTemplateSelect');
+  const templates=getTemplates();
+  sel.innerHTML=templates.length===0
+    ?'<option value="">-- 请先在「测试模板」页保存模板 --</option>'
+    :'<option value="">-- 选择模板 --</option>'+templates.map(t=>`<option value="${t.id}">${escHtml(t.name||'未命名')} — ${t.method} ${escHtml(t.url).substring(0,50)}</option>`).join('');
+}
+
+function onRunTemplateChange(){
+  const id=document.getElementById('runTemplateSelect').value;
+  const info=document.getElementById('runTemplateInfo');
+  const t=id?getTemplates().find(x=>String(x.id)===String(id)):null;
+  if(!t){
+    info.classList.add('hidden');
+    document.getElementById('runTesterMode').classList.add('hidden');
+    document.getElementById('runNonTesterMode').classList.add('hidden');
+    return;
+  }
+  const isTester=t.mode!=='non_tester';
+  document.getElementById('runTesterMode').classList.toggle('hidden',!isTester);
+  document.getElementById('runNonTesterMode').classList.toggle('hidden',isTester);
+  // 重置分组结果
+  document.getElementById('groupedResultArea').classList.add('hidden');
+  document.getElementById('ntGroupedResultArea').classList.add('hidden');
+
+  // Extract placeholders
+  const phRegex=/\{\{(\w+)\}\}/g,phs=new Set(),builtin=['uuid','uuid_short','now','date','timestamp','random_int','random_str','faker_email','faker_name','faker_phone'];
+  let m;const combined=(t.url+t.body+t.headers);
+  while((m=phRegex.exec(combined))!==null){if(!builtin.includes(m[1]))phs.add(m[1]);}
+
+  info.classList.remove('hidden');
+  info.innerHTML=isTester?`
+    <div class="space-y-1.5">
+      <div><span class="text-slate-400">Method：</span><span class="tag font-mono" style="background:rgba(37,99,235,0.1);color:#1D4ED8;">${t.method}</span></div>
+      <div><span class="text-slate-400">URL：</span><span class="font-mono text-slate-700">${escHtml(t.url)}</span></div>
+      ${t.body?`<div><span class="text-slate-400">Body：</span><span class="font-mono text-slate-600">${escHtml(t.body.substring(0,100))}${t.body.length>100?'…':''}</span></div>`:''}
+      ${t.cookie?'<div><span class="text-slate-400">Cookie：</span><span class="tag" style="background:rgba(16,185,129,0.1);color:#059669;">已配置</span></div>':''}
+      <div><span class="text-slate-400">Timeout：</span><span class="font-mono text-slate-600">${t.timeout}s</span></div>
+      ${phs.size>0?`<div class="pt-1.5 mt-1" style="border-top:1px solid rgba(37,99,235,0.1);"><span class="text-slate-400">Placeholders：</span><span class="font-mono text-indigo-600">${[...phs].map(p=>'{{'+p+'}}').join(' ')}</span></div>`:''}
+    </div>`:`
+    <div class="space-y-1">
+      <div><span class="text-slate-400">接口：</span><span class="font-semibold text-slate-700">${escHtml(t.name)}</span></div>
+      <div><span class="tag" style="background:rgba(16,185,129,0.1);color:#059669;">非测试人员 · 简化模式</span></div>
+    </div>`;
+
+  if(!isTester){
+    const guide=document.getElementById('runColumnGuide');
+    const desc=document.getElementById('runColumnDescText');
+    if(t.column_desc){guide.classList.remove('hidden');desc.textContent=t.column_desc}
+    else guide.classList.add('hidden');
+  }
+}
+
+// ===== File Upload (shared) =====
+let dataRows=[],dataColumns=[],currentMode='tester';
+
+(function initUploads(){
+  // Tester
+  const dz=document.getElementById('dataDropZone'),fi=document.getElementById('dataFileInput');
+  if(dz&&fi){
+    dz.addEventListener('click',()=>fi.click());
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-active')});
+    dz.addEventListener('dragleave',()=>dz.classList.remove('drag-active'));
+    dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-active');if(e.dataTransfer.files.length)handleFile(e.dataTransfer.files[0],'tester')});
+    fi.addEventListener('change',()=>{if(fi.files.length)handleFile(fi.files[0],'tester')});
+  }
+  // Non-tester
+  const ndz=document.getElementById('ntDataDropZone'),nfi=document.getElementById('ntDataFileInput');
+  if(ndz&&nfi){
+    ndz.addEventListener('click',()=>nfi.click());
+    ndz.addEventListener('dragover',e=>{e.preventDefault();ndz.classList.add('drag-active')});
+    ndz.addEventListener('dragleave',()=>ndz.classList.remove('drag-active'));
+    ndz.addEventListener('drop',e=>{e.preventDefault();ndz.classList.remove('drag-active');if(e.dataTransfer.files.length)handleFile(e.dataTransfer.files[0],'non_tester')});
+    nfi.addEventListener('change',()=>{if(nfi.files.length)handleFile(nfi.files[0],'non_tester')});
+  }
+})();
+
+async function handleFile(file,mode){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(!['csv','xlsx'].includes(ext)){alert('仅支持 .csv 和 .xlsx');return}
+  currentMode=mode;
+  const fd=new FormData();fd.append('file',file);
+  const resp=await fetch('/api/preview_full',{method:'POST',body:fd});
+  const data=await resp.json();
+  dataRows=data.rows||[];dataColumns=data.columns||[];
+  if(mode==='tester'){
+    document.getElementById('dataFileInfo').classList.remove('hidden');
+    document.getElementById('dataFileName').textContent=file.name;
+    document.getElementById('dataFileCount').textContent=`${data.total} 条数据`;
+    document.getElementById('groupedResultArea').classList.add('hidden');
+    document.getElementById('resultArea').classList.add('hidden');
+    renderPreview();
+  }else{
+    document.getElementById('ntDataFileInfo').classList.remove('hidden');
+    document.getElementById('ntDataFileName').textContent=file.name;
+    document.getElementById('ntDataFileCount').textContent=`共 ${data.total} 条`;
+    document.getElementById('ntGroupedResultArea').classList.add('hidden');
+    document.getElementById('ntRunHint').classList.add('hidden');
+  }
+}
+
+function resetNTFile(){
+  dataRows=[];dataColumns=[];
+  document.getElementById('ntDataFileInfo').classList.add('hidden');
+  document.getElementById('ntResultArea').classList.add('hidden');
+  document.getElementById('ntGroupedResultArea').classList.add('hidden');
+  document.getElementById('ntRunHint').classList.remove('hidden');
+  document.getElementById('ntDataFileInput').value='';
+}
+
+function renderPreview(){
+  const c=document.getElementById('dataPreview'),t=document.getElementById('dataPreviewTable');
+  if(dataRows.length===0){c.classList.add('hidden');return}
+  c.classList.remove('hidden');
+  const rows=dataRows.slice(0,10),more=dataRows.length>10;
+  t.innerHTML=`<table class="w-full text-xs"><thead><tr style="background:rgba(241,245,249,0.8);">`
+    +`<th class="px-3 py-2 text-left font-semibold text-slate-500 sticky left-0" style="background:rgba(241,245,249,0.95);">#</th>`
+    +dataColumns.map(c=>`<th class="px-3 py-2 text-left font-semibold text-slate-500 whitespace-nowrap">${c}</th>`).join('')
+    +`</tr></thead><tbody>`
+    +rows.map((r,i)=>`<tr class="hover:bg-blue-50/50 transition-colors"><td class="px-3 py-2 text-slate-400">${i+1}</td>`
+      +dataColumns.map(c=>`<td class="px-3 py-2 text-slate-600 max-w-[140px] truncate" title="${escAttr(fmt(r[c]))}">${escHtml(fmt(r[c]))}</td>`).join('')
+      +`</tr>`).join('')
+    +`</tbody>${more?`<tfoot><tr><td colspan="${dataColumns.length+1}" class="px-3 py-2 text-center text-xs text-slate-400">… 还有 ${dataRows.length-10} 条未显示</td></tr></tfoot>`:''}</table>`;
+}
+
+// ===== Run Tests =====
+async function runTests(){
+  const tplId=document.getElementById('runTemplateSelect').value;
+  if(!tplId){alert('请先选择模板');return}
+  if(dataRows.length===0){alert('请先上传数据文件');return}
+  const tpl=getTemplates().find(x=>String(x.id)===String(tplId));
+  if(!tpl){alert('模板不存在');return}
+
+  const isTester=tpl.mode!=='non_tester';
+  currentMode=isTester?'tester':'non_tester';
+
+  // Build rows
+  const rows=[];
+  for(const dRow of dataRows){
+    const row={};
+    for(const key of Object.keys(dRow)){
+      if(['case_id','description','expected_status','expected_max_ms','extract'].includes(key))row[key]=dRow[key];
+      if(key.startsWith('expected_')&&key!=='expected_status'&&key!=='expected_max_ms')row[key]=dRow[key];
+    }
+    row.method=tpl.method;
+    let url=tpl.url;
+    for(const col of Object.keys(dRow))url=url.replace(new RegExp(`\\{\\{${col}\\}\\}`,'g'),fmt(dRow[col]));
+    row.path=url;
+    if(tpl.body){
+      let b=tpl.body;
+      for(const col of Object.keys(dRow))b=b.replace(new RegExp(`\\{\\{${col}\\}\\}`,'g'),fmt(dRow[col]));
+      try{row.request_body=JSON.parse(b)}catch{row.request_body=b}
+    }
+    if(tpl.headers){
+      let h=tpl.headers;
+      for(const col of Object.keys(dRow))h=h.replace(new RegExp(`\\{\\{${col}\\}\\}`,'g'),fmt(dRow[col]));
+      try{row.headers=JSON.parse(h)}catch{}
+    }
+    rows.push(row);
+  }
+
+  // UI refs
+  const btn=isTester?document.getElementById('runBtn'):document.getElementById('ntRunBtn');
+  const runIcon=isTester?document.getElementById('runIcon'):document.getElementById('ntRunIcon');
+  const progressEl=isTester?document.getElementById('runProgress'):document.getElementById('ntRunProgress');
+  const progressBar=isTester?document.getElementById('progressBar'):document.getElementById('ntProgressBar');
+  const statusEl=isTester?document.getElementById('runStatus'):document.getElementById('ntRunStatus');
+  const resultArea=isTester?document.getElementById('resultArea'):document.getElementById('ntResultArea');
+
+  btn.disabled=true;
+  if(isTester)statusEl.textContent='正在执行…';
+  else statusEl.textContent='正在测试中，请稍候…';
+  progressEl.classList.remove('hidden');
+  progressBar.style.width='20%';
+  resultArea.classList.add('hidden');
+  runIcon.innerHTML='<svg class="animate-spin" width="'+(isTester?'16':'22')+'" height="'+(isTester?'16':'22')+'" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/><path d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" opacity="0.75"/></svg>';
+
+  const tid=setInterval(()=>{let w=parseFloat(progressBar.style.width)||20;if(w<85)progressBar.style.width=(w+Math.random()*8)+'%'},400);
+
+  try{
+    const fd=new FormData();
+    fd.append('baseUrl','');fd.append('cookie',tpl.cookie||'');
+    fd.append('timeout',String(tpl.timeout||30));fd.append('rows_json',JSON.stringify(rows));
+    const resp=await fetch('/api/run',{method:'POST',body:fd});
+    const data=await resp.json();
+    clearInterval(tid);progressBar.style.width='100%';
+    // 将分组 keys 和原始数据行注入结果，用于分组展示
+    data.group_keys = (tpl.result_group_keys||'').split(',').map(s=>s.trim()).filter(Boolean);
+    data.original_rows = dataRows;
+    isTester?renderTesterResult(data):renderNonTesterResult(data);
+    if(isTester)statusEl.textContent='✓ 完成';
+    else statusEl.textContent='✓ 测试完成！';
+  }catch(e){
+    clearInterval(tid);
+    if(isTester){statusEl.textContent='✗ '+e.message;document.getElementById('resultText').textContent='异常: '+e.message;document.getElementById('resultArea').classList.remove('hidden')}
+    else{statusEl.textContent='✗ '+e.message;document.getElementById('ntResultList').innerHTML='<div class="p-8 text-center"><p class="text-red-500 text-sm">执行异常</p><p class="text-xs text-slate-400 mt-1">'+escHtml(e.message)+'</p></div>';document.getElementById('ntResultArea').classList.remove('hidden')}
+  }finally{
+    btn.disabled=false;progressBar.style.width='0%';
+    setTimeout(()=>progressEl.classList.add('hidden'),1500);
+    runIcon.innerHTML=isTester?'<path d="M8 5v14l11-7z"/>':'<path d="M8 5v14l11-7z"/>';
+  }
+}
+
+// ===== Results =====
+function renderTesterResult(data){
+  const sc=data.status_counts||{},passRate=data.total>0?((sc['成功']||0)/data.total*100).toFixed(1):'0';
+  const avgMs=data.results.filter(r=>r.elapsed_ms>0).length>0?Math.round(data.results.filter(r=>r.elapsed_ms>0).reduce((s,r)=>s+r.elapsed_ms,0)/data.results.filter(r=>r.elapsed_ms>0).length):0;
+  const lines=[];
+  lines.push('╔══════════════════════════════════════════════╗');
+  lines.push('║        TEST RESULTS SUMMARY                  ║');
+  lines.push('╠══════════════════════════════════════════════╣');
+  lines.push(`║  Total: ${String(data.total).padEnd(5)} | ✅ Success: ${String(sc['成功']||0).padEnd(5)} | ❌ Failed: ${String(sc['失败']||0).padEnd(5)}  ║`);
+  lines.push(`║  Pass Rate: ${String(passRate+'%').padEnd(6)} | ⏱  Avg: ${String(avgMs+'ms').padEnd(6)}                  ║`);
+  lines.push('╚══════════════════════════════════════════════╝');
+  lines.push('');
+  for(let i=0;i<data.results.length;i++){
+    const r=data.results[i],ok=r.passed;
+    lines.push(`${ok?'✅':'❌'} [${i+1}] ${r.case_id||'#'+(i+1)}  ${r.description||''}`);
+    lines.push(`   ${r.method} ${r.url}  → ${r.status_code||'???'}  ${r.elapsed_ms}ms`);
+    if(r.failure_reason)lines.push(`   ⚠️  ${r.failure_reason}`);
+    if(r.response_body){const s=typeof r.response_body==='string'?r.response_body:JSON.stringify(r.response_body);lines.push(`   📦 ${s.substring(0,180)}${s.length>180?' …':''}`);}
+    lines.push('');
+  }
+  lines.push('─'.repeat(52));
+  lines.push(`  Finished at ${new Date().toLocaleString()}`);
+  document.getElementById('resultText').textContent=lines.join('\n');
+  document.getElementById('resultArea').classList.remove('hidden');
+
+  // 分组结果
+  renderGroupedResults(data,'groupedResultArea',false);
+}
+
+function renderGroupedResults(data, containerId, badge){
+  const groupKeys=data.group_keys||[];
+  const origRows=data.original_rows||[];
+  const results=data.results||[];
+  const container=document.getElementById(containerId);
+  if(groupKeys.length===0){container.classList.add('hidden');return}
+  container.classList.remove('hidden');
+  container.innerHTML='';
+
+  // 将结果和原始数据行关联（按索引），再按分组字段聚合
+  const merged=results.map((r,i)=>({...r,_row:origRows[i]||{}}));
+  const allGroups={};
+  for(const item of merged){
+    const key=groupKeys.map(k=>fmt(item._row[k]||'-')).join(' | ');
+    if(!allGroups[key])allGroups[key]={items:[],display:{}};
+    allGroups[key].items.push(item);
+    groupKeys.forEach(k=>allGroups[key].display[k]=item._row[k]);
+  }
+
+  const sep = badge ? '<span class="text-slate-300">+</span>' : '<span class="text-slate-300 mx-1">·</span>';
+
+  let html=`<div class="glass-card rounded-2xl overflow-hidden">
+    <div class="px-5 py-3.5 flex items-center gap-2" style="background:rgba(241,245,249,0.8);border-bottom:1px solid var(--border);">
+      <div style="width:4px;height:20px;background:var(--primary);border-radius:2px;"></div>
+      <h3 class="text-[13px] font-semibold text-slate-600">分组结果汇总</h3>
+      <span class="text-[11px] text-slate-400 ml-auto">共 ${merged.length} 条</span>
+    </div>`;
+
+  for(const [key,group] of Object.entries(allGroups)){
+    const passCount=group.items.filter(r=>r.passed).length;
+    const failCount=group.items.filter(r=>!r.passed).length;
+
+    const labelHtml=groupKeys.map(k=>{
+      const val=escHtml(fmt(group.display[k]||'-'));
+      return badge
+        ? `<span class="px-2 py-0.5 rounded-md font-mono text-[11px]" style="background:rgba(99,102,241,0.06);color:#4F46E5;">${val}</span>`
+        : `<span class="text-[10px] text-slate-400">${k}</span><span class="font-mono font-bold text-[11px] text-slate-700">${val}</span>`;
+    }).join(sep);
+
+    html+=`<div class="px-5 py-3" style="border-bottom:1px solid rgba(226,232,240,0.4);">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 flex-wrap">${labelHtml}</div>
+        <div class="flex items-center gap-2 shrink-0">
+          ${passCount>0?`<span class="text-[11px] font-medium" style="color:#059669;">✓ ${passCount} 通过</span>`:''}
+          ${failCount>0?`<span class="text-[11px] font-medium text-red-500">✗ ${failCount} 失败</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  html+=`</div>`;
+  container.innerHTML=html;
+}
+
+function renderNonTesterResult(data){
+  const sc=data.status_counts||{};
+  const success=sc['成功']||0,fail=(sc['失败']||0)+(sc['异常']||0),total=data.total;
+  const passRate=total>0?Math.round(success/total*100):0;
+
+  document.getElementById('ntTotalCount').textContent=total;
+  document.getElementById('ntSuccessCount').textContent=success;
+  document.getElementById('ntFailCount').textContent=fail;
+  document.getElementById('ntPassRate').textContent=passRate+'%';
+  document.getElementById('ntPassBar').style.width=passRate+'%';
+
+  document.getElementById('ntResultList').innerHTML=data.results.map((r,i)=>{
+    const ok=r.passed;
+    const icon=ok
+      ?'<div class="status-dot" style="background:rgba(16,185,129,0.15);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>'
+      :'<div class="status-dot" style="background:rgba(239,68,68,0.1);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>';
+    const reason=!ok&&r.failure_reason?`<div class="mt-1 text-xs text-red-400">${escHtml(r.failure_reason)}</div>`:'';
+    const desc=r.description||r.case_id||`第${i+1}条`;
+    return`<div class="flex items-start gap-3 px-5 py-3.5 hover:bg-slate-50/60 transition-colors">${icon}<div class="flex-1 min-w-0"><span class="text-sm font-medium ${ok?'text-slate-700':'text-red-600'}">${escHtml(desc)}</span>${reason}</div><span class="text-xs text-slate-400 shrink-0 font-mono">${r.elapsed_ms}ms</span></div>`;
+  }).join('');
+  document.getElementById('ntResultArea').classList.remove('hidden');
+
+  // 分组结果（复用同一渲染函数）
+  renderGroupedResults(data,'ntGroupedResultArea',true);
+}
+
+// ===== Copy =====
+function copyResult(){
+  const text=document.getElementById('resultText').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const el=document.getElementById('runStatus');el.textContent='✓ 已复制';setTimeout(()=>el.textContent='✓ 完成',2000);
+  }).catch(()=>{alert('复制失败')});
+}
+
+// ===== Utils =====
+function escHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function escAttr(s){return String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function fmt(v){if(v===null||v===undefined)return'';if(typeof v==='object')return JSON.stringify(v);return String(v)}
+
+// ===== API Debug =====
+const DBG_HISTORY_KEY = 'api_debug_history';
+function getDbgHistory(){try{return JSON.parse(localStorage.getItem(DBG_HISTORY_KEY))||[]}catch{return[]}}
+function setDbgHistory(l){localStorage.setItem(DBG_HISTORY_KEY,JSON.stringify(l.slice(0,50)))}
+
+function loadDbgHistory(){
+  const list=getDbgHistory();
+  const container=document.getElementById('dbgHistory');
+  if(list.length===0){container.innerHTML='<div class="text-xs text-slate-300 py-4 text-center">发送请求后显示历史</div>';return}
+  const colors={GET:'#3B82F6',POST:'#10B981',PUT:'#F59E0B',PATCH:'#8B5CF6',DELETE:'#EF4444',HEAD:'#6B7280',OPTIONS:'#EC4899'};
+  container.innerHTML=list.map((r,i)=>{
+    const ok=r.success;
+    return`<div class="flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer hover:bg-slate-50/80 transition-colors text-xs" onclick="restoreDbgHistory(${i})">
+      <span class="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded-md shrink-0" style="background:${colors[r.method]||'#6B7280'}15;color:${colors[r.method]||'#6B7280'};">${r.method}</span>
+      <span class="truncate text-slate-600 flex-1">${escHtml((r.url||'').substring(0,40))}</span>
+      <span class="font-mono font-bold text-[11px] shrink-0" style="color:${ok?'#10B981':'#EF4444'}">${r.status_code||'ERR'}</span>
+      <span class="text-[10px] text-slate-400 shrink-0">${r.elapsed_ms||0}ms</span>
+    </div>`;
+  }).join('');
+}
+
+function restoreDbgHistory(idx){
+  const items=getDbgHistory();
+  const r=items[idx];if(!r)return;
+  document.getElementById('dbgMethod').value=r.method||'GET';
+  document.getElementById('dbgUrl').value=r.url||'';
+  document.getElementById('dbgBody').value=r.body||'';
+  document.getElementById('dbgTimeout').value=r.timeout||30;
+  document.getElementById('dbgRetry').value=r.retry||3;
+  document.getElementById('dbgRetryDelay').value=r.retry_delay||1;
+  // headers
+  const hList=document.getElementById('dbgHeadersList');
+  const hs=r.headers||{};
+  let html='';
+  Object.entries(hs).forEach(([k,v])=>html+=dbgHeaderRow(k,v));
+  if(!html)html=dbgHeaderRow('Content-Type','application/json');
+  hList.innerHTML=html;
+  onDbgMethodChange();
+  switchTab('debug');
+  // scroll to top
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function dbgHeaderRow(key,val){
+  return`<div class="flex gap-2 items-center header-row">
+    <input type="text" value="${escAttr(key||'')}" placeholder="Key" class="input-field flex-1 mono text-xs py-2">
+    <input type="text" value="${escAttr(val||'')}" placeholder="Value" class="input-field flex-1 mono text-xs py-2">
+    <button onclick="removeDbgHeader(this)" class="text-slate-300 hover:text-red-400 transition-colors shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button>
+  </div>`;
+}
+
+function addDbgHeader(){
+  const el=document.getElementById('dbgHeadersList');
+  el.insertAdjacentHTML('beforeend',dbgHeaderRow('',''));
+}
+
+function removeDbgHeader(btn){btn.closest('.header-row').remove()}
+
+function collectDbgHeaders(){
+  const rows=document.querySelectorAll('#dbgHeadersList .header-row');
+  const h={};
+  rows.forEach(r=>{
+    const inputs=r.querySelectorAll('input');
+    const k=inputs[0].value.trim(),v=inputs[1].value.trim();
+    if(k)h[k]=v;
+  });
+  return h;
+}
+
+function onDbgMethodChange(){
+  const m=document.getElementById('dbgMethod').value;
+  const showBody=!['GET','HEAD','OPTIONS'].includes(m);
+  document.getElementById('dbgBodySection').style.display=showBody?'':'none';
+}
+
+async function sendDebugRequest(){
+  const method=document.getElementById('dbgMethod').value;
+  const url=document.getElementById('dbgUrl').value.trim();
+  if(!url){alert('请输入 URL');return}
+
+  const headers=collectDbgHeaders();
+  const body=document.getElementById('dbgBody').value;
+  const timeout=parseInt(document.getElementById('dbgTimeout').value)||30;
+  const retry=parseInt(document.getElementById('dbgRetry').value)||3;
+  const retryDelay=parseFloat(document.getElementById('dbgRetryDelay').value)||1;
+
+  // UI 状态
+  const btn=document.getElementById('dbgSendBtn');
+  const icon=document.getElementById('dbgSendIcon');
+  btn.disabled=true;
+  icon.innerHTML='<svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/><path d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" opacity="0.75"/></svg>';
+
+  document.getElementById('dbgResponsePlaceholder').classList.add('hidden');
+  document.getElementById('dbgResponseContent').classList.remove('hidden');
+  document.getElementById('dbgRespBody').textContent='⏳ 请求中…';
+  document.getElementById('dbgStatusTag').className='hidden';
+  document.getElementById('dbgTiming').classList.add('hidden');
+
+  try{
+    const fd=new FormData();
+    fd.append('method',method);
+    fd.append('url',url);
+    fd.append('headers',JSON.stringify(headers));
+    fd.append('body',body);
+    fd.append('timeout',String(timeout));
+    fd.append('retry',String(retry));
+
+    const resp=await fetch('/api/request',{method:'POST',body:fd});
+    const data=await resp.json();
+
+    // 渲染响应
+    renderDbgResponse(data);
+
+    // 保存历史
+    const hist=getDbgHistory();
+    hist.unshift({
+      method,url,
+      headers,body,
+      timeout,retry,retry_delay:retryDelay,
+      success:data.success,
+      status_code:data.response?data.response.status_code:0,
+      elapsed_ms:data.response?data.response.elapsed_ms:(data.elapsed_ms||0),
+      timestamp:new Date().toISOString(),
+    });
+    setDbgHistory(hist);
+    loadDbgHistory();
+  }catch(e){
+    document.getElementById('dbgRespBody').textContent='请求异常:\n'+e.message;
+    document.getElementById('dbgStatusTag').className='tag text-xs';
+    document.getElementById('dbgStatusTag').innerHTML='<span style="color:#EF4444;">ERROR</span>';
+    document.getElementById('dbgStatusTag').classList.remove('hidden');
+  }finally{
+    btn.disabled=false;
+    icon.innerHTML='<path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>';
+  }
+}
+
+function renderDbgResponse(data){
+  // 状态码标签
+  const statusTag=document.getElementById('dbgStatusTag');
+  const timing=document.getElementById('dbgTiming');
+  statusTag.className='tag text-xs px-2 py-0.5 rounded-md font-mono font-bold';
+  statusTag.classList.remove('hidden');
+
+  if(data.success && data.response){
+    const sc=data.response.status_code;
+    let color=sc<300?'#10B981':sc<400?'#3B82F6':sc<500?'#F59E0B':'#EF4444';
+    let bg=sc<300?'rgba(16,185,129,0.1)':sc<400?'rgba(59,130,246,0.1)':sc<500?'rgba(245,158,11,0.1)':'rgba(239,68,68,0.1)';
+    statusTag.textContent=sc;
+    statusTag.style.color=color;statusTag.style.background=bg;
+
+    timing.textContent=data.response.elapsed_ms+'ms';
+    timing.classList.remove('hidden');
+
+    // 响应头
+    const respHeaders=data.response.headers||{};
+    document.getElementById('dbgRespHeaders').textContent=Object.entries(respHeaders).map(([k,v])=>k+': '+v).join('\n');
+
+    // 响应体
+    let bodyText;
+    if(data.response.body_json!==null&&data.response.body_json!==undefined){
+      bodyText=JSON.stringify(data.response.body_json,null,2);
+    }else{
+      bodyText=data.response.body_text||'';
+    }
+    document.getElementById('dbgRespBody').textContent=bodyText;
+
+    const sizeBytes=data.response.content_length||0;
+    document.getElementById('dbgBodySize').textContent=sizeBytes>1024?(sizeBytes/1024).toFixed(1)+' KB':sizeBytes+' B';
+
+    // 重试信息
+    document.getElementById('dbgRetryInfo').classList.toggle('hidden',!data.retry_used);
+    const attempts=data.attempts||[];
+    if(attempts.length>1){
+      document.getElementById('dbgAttempts').classList.remove('hidden');
+      document.getElementById('dbgAttemptsList').innerHTML=attempts.map(a=>{
+        const ok=a.status_code>0&&a.status_code<500;
+        return`<div class="flex items-center gap-2 text-[11px] px-2 py-1 rounded-lg" style="background:${a.retried?'rgba(245,158,11,0.06)':'rgba(16,185,129,0.04)'};">
+          <span class="font-mono font-bold" style="color:${ok?'#10B981':'#F59E0B'};">#${a.attempt}</span>
+          <span class="font-mono text-slate-500">${a.status_code||'ERR'}</span>
+          <span class="text-slate-400 ml-auto">${a.elapsed_ms}ms</span>
+          ${a.retried?'<span class="text-[10px] text-amber-500 ml-1">已重试</span>':''}
+          ${a.error?`<span class="text-[10px] text-red-400 ml-1">${escHtml(a.error.substring(0,40))}</span>`:''}
+        </div>`;
+      }).join('');
+    }else{
+      document.getElementById('dbgAttempts').classList.add('hidden');
+    }
+  }else{
+    statusTag.textContent='FAIL';
+    statusTag.style.color='#EF4444';statusTag.style.background='rgba(239,68,68,0.1)';
+    timing.classList.add('hidden');
+    document.getElementById('dbgRespBody').textContent='请求失败:\n'+(data.error||'Unknown error');
+    document.getElementById('dbgRespHeaders').textContent='';
+    document.getElementById('dbgBodySize').textContent='';
+    document.getElementById('dbgRetryInfo').classList.remove('hidden');
+    document.getElementById('dbgAttempts').classList.remove('hidden');
+    const attempts=data.attempts||[];
+    document.getElementById('dbgAttemptsList').innerHTML=attempts.map(a=>{
+      return`<div class="flex items-center gap-2 text-[11px] px-2 py-1 rounded-lg" style="background:rgba(239,68,68,0.04);">
+        <span class="font-mono font-bold text-red-400">#${a.attempt}</span>
+        <span class="text-slate-500">ERR</span>
+        <span class="text-slate-400 ml-auto">${a.elapsed_ms}ms</span>
+        ${a.retried?'<span class="text-[10px] text-amber-500 ml-1">已重试</span>':''}
+        ${a.error?`<span class="text-[10px] text-red-400 ml-1">${escHtml(a.error.substring(0,50))}</span>`:''}
+      </div>`;
+    }).join('');
+  }
+}
+
+function copyDbgResponse(){
+  const text=document.getElementById('dbgRespBody').textContent;
+  navigator.clipboard.writeText(text).then(()=>{}).catch(()=>alert('复制失败'));
+}
+
+function clearDbgHistory(){
+  setDbgHistory([]);
+  loadDbgHistory();
+}
+
+// ===== Init =====
+onDbgMethodChange();
+loadLastTemplate();
+renderTplList();
+</script>
+</body>
+</html>

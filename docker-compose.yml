@@ -1,0 +1,33 @@
+# docker-compose.yml - pyzdhu 服务编排
+#
+# 用法:
+#   构建并启动 Web 服务:        docker compose up --build
+#   浏览器访问:                  http://localhost:8899/
+#
+#   在容器内跑全部 pytest:       docker compose --profile test run --rm pytest
+#   只跑 UI 测试(需手动生成报告): docker compose --profile test run --rm pytest \
+#                                      sh -c "pytest -m ui; python generate_allure.py"
+#   报告生成在宿主机:            ./reports/allure-report/index.html
+#
+# 说明:
+#   - web 服务默认启动（Web 平台，端口 8899）
+#   - pytest 服务在 test profile 下，不会随 up 自动启动，避免误跑测试
+#   - reports 目录挂载到宿主机，测试报告/截图可持续保存
+
+services:
+  web:
+    build: .
+    container_name: pyzdhu-web
+    ports:
+      - "8899:8899"
+    restart: unless-stopped
+
+  pytest:
+    build: .
+    container_name: pyzdhu-pytest
+    # 跑完 pytest 后立刻生成 Allure HTML 报告（无论测试是否全过都生成）
+    command: sh -c "pytest; python generate_allure.py"
+    volumes:
+      - ./reports:/app/reports
+    profiles:
+      - test

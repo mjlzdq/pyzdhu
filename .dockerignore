@@ -1,0 +1,29 @@
+# 版本控制
+.git
+.gitignore
+
+# Python 虚拟环境与缓存
+venv/
+__pycache__/
+*.py[cod]
+*.pyc
+
+# 测试/构建产物（容器内可重新生成，无需打包进镜像）
+reports/
+.coverage
+.pytest_cache/
+allure-results/
+htmlcov/
+
+# IDE / 工具配置
+.codebuddy/
+.vscode/
+.idea/
+.DS_Store
+
+# 前端无关产物
+node_modules/
+dist/
+
+# 平台特定目录（与本项目无关）
+yang/

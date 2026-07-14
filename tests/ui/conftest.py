@@ -72,20 +72,3 @@ def base_ui_url():
     return config.ui_base_url
 
 
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    """失败自动截图"""
-    outcome = yield
-    report = outcome.get_result()
-
-    if report.when == "call" and report.failed:
-        if "page" in item.funcargs:
-            page = item.funcargs["page"]
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"{item.name}_{timestamp}.png"
-            filepath = REPORT_DIR / filename
-            try:
-                page.screenshot(path=str(filepath), full_page=True)
-                print(f"\n📸 失败截图: {filepath}")
-            except Exception:
-                pass

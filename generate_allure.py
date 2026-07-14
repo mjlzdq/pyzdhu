@@ -3,6 +3,7 @@
 Allure 报告生成器（纯 Python，无需 allure 命令行）
 读取 allure-results/*-result.json 生成 HTML 报告
 """
+import html
 import json
 import os
 import sys
@@ -181,12 +182,15 @@ tr:hover {{ background: #f8f9ff; }}
 
             fail_info = ""
             if status in ("failed", "broken"):
-                fail_info = f'<div class="fail-reason" title="{status_msg[:500]}">{status_msg[:80]}</div>'
+                safe_msg = html.escape(status_msg)
+                safe_title = safe_msg.replace("\n", " ").replace("\r", "")[:500]
+                fail_info = f'<div class="fail-reason" title="{safe_title}">{safe_msg[:80]}</div>'
 
+            safe_name = html.escape(name)
             html += f"""
             <tr>
                 <td><span class="status-badge" style="background:{color}20;color:{color}">{icon} {status}</span></td>
-                <td class="name-cell">{name}</td>
+                <td class="name-cell">{safe_name}</td>
                 <td class="duration-cell">{format_duration(duration)}</td>
                 <td>{fail_info}</td>
             </tr>"""

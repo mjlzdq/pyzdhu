@@ -43,7 +43,8 @@ jobs:
 
   api-tests:
     runs-on: ubuntu-latest
-    continue-on-error: true    # 内网服务 CI 连不到时不阻断整体流水线
+    # 不再全局忽略失败；如需容忍外部服务波动，建议改用 --reruns + 条件判断
+    # continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 

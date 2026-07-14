@@ -113,9 +113,11 @@ def pytest_configure(config):
 
 
 def pytest_sessionstart(session):
-    """会话开始时写入 Allure 环境信息"""
-    allure_dir = session.config.option.allure_report_dir
-    if allure_dir:
+    """会话开始时写入 Allure 环境信息（allure 插件未启用时安全跳过）"""
+    allure_dir = getattr(session.config.option, "alluredir", None)
+    if not allure_dir:
+        return
+    try:
         os.makedirs(allure_dir, exist_ok=True)
         env_file = os.path.join(allure_dir, "environment.properties")
         with open(env_file, "w", encoding="utf-8") as f:
@@ -126,6 +128,9 @@ def pytest_sessionstart(session):
             f.write(f"Headless={config.ui_config.get('headless', True)}\n")
             import sys
             f.write(f"Python={sys.version.split()[0]}\n")
+    except Exception:
+        # 环境信息写入失败不应中断整个测试会话
+        pass
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

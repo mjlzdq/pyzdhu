@@ -4,6 +4,9 @@
 import re
 from typing import Any
 
+# 预编译路径分割正则，避免每次调用重复编译
+_NESTED_PATH_RE = re.compile(r'(?<=\])\.|\.|(?=\[)')
+
 
 def get_nested(data: Any, path: str) -> Any:
     """
@@ -23,7 +26,7 @@ def get_nested(data: Any, path: str) -> Any:
     if not isinstance(data, (dict, list)) or not path:
         return None
 
-    parts = re.split(r'(?<=\])\.|\.|(?=\[)', path)
+    parts = _NESTED_PATH_RE.split(path)
     parts = [p for p in parts if p]
 
     cur = data

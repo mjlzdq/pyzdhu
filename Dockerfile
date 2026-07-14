@@ -14,16 +14,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 复制整个项目（含 common / tests / data / web_platform）
 COPY . /app
 
-# 安装依赖：
-#  - requirements.txt：pytest / playwright / openpyxl 等测试依赖
-#  - fastapi + uvicorn：Web 服务依赖（根 requirements 未包含）
+# 安装依赖（requirements.txt 已包含测试与 Web 服务全部依赖）
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt \
-    && pip install "fastapi>=0.110.0" "uvicorn>=0.27.0" "python-multipart>=0.0.6"
+    && pip install -r requirements.txt
 
 # 安装 Playwright 浏览器（运行 -m ui 标记测试所需）。
 # 若只跑 unit/api/ddt 等无需浏览器的用例，可注释掉本行以显著加快构建。
 RUN playwright install --with-deps chromium
+
+# 创建非 root 用户运行服务，降低容器逃逸风险
+RUN groupadd -r appgroup && useradd -r -g appgroup -m appuser
+RUN chown -R appuser:appgroup /app
+USER appuser
 
 # Web 服务端口
 EXPOSE 8899

@@ -12,7 +12,7 @@ class DataReader:
     """读取 xlsx / csv 测试数据文件，自动识别格式"""
 
     @staticmethod
-    def read_csv(filepath: str, encoding: str = "utf-8-sig") -> List[Dict[str, Any]]:
+    def read_csv(filepath: str, encoding: str = "utf-8-sig", auto_convert: bool = True) -> List[Dict[str, Any]]:
         """
         读取 CSV 文件，每行返回一个 dict
 
@@ -20,6 +20,9 @@ class DataReader:
         - BOM 头 (utf-8-sig)
         - JSON 字段自动解析（以 { 或 [ 开头的值）
         - 数字自动转换
+
+        Args:
+            auto_convert: 是否自动转换数据类型（默认 True）；设为 False 时所有值保留字符串
         """
         filepath = Path(filepath)
         if not filepath.exists():
@@ -36,7 +39,7 @@ class DataReader:
                 for key, value in row.items():
                     key = key.strip()
                     value = value.strip() if value else ""
-                    parsed[key] = DataReader._auto_convert(value)
+                    parsed[key] = DataReader._auto_convert(value, auto_convert=auto_convert)
                 parsed["_row_num"] = row_num  # 记录行号，方便定位
                 rows.append(parsed)
 
@@ -46,13 +49,14 @@ class DataReader:
         return rows
 
     @staticmethod
-    def read_xlsx(filepath: str, sheet: Optional[str] = None) -> List[Dict[str, Any]]:
+    def read_xlsx(filepath: str, sheet: Optional[str] = None, auto_convert: bool = True) -> List[Dict[str, Any]]:
         """
         读取 Excel 文件，每行返回一个 dict
 
         Args:
             filepath: xlsx 文件路径
             sheet: 工作表名，默认第一个 sheet
+            auto_convert: 是否自动转换数据类型（默认 True）；设为 False 时所有值保留字符串
         """
         try:
             import openpyxl
@@ -82,7 +86,7 @@ class DataReader:
                 if cell_value is not None:
                     is_empty = False
                 value = str(cell_value).strip() if cell_value is not None else ""
-                row_data[header] = DataReader._auto_convert(value)
+                row_data[header] = DataReader._auto_convert(value, auto_convert=auto_convert)
 
             if not is_empty:
                 row_data["_row_num"] = row_num
@@ -96,27 +100,32 @@ class DataReader:
         return rows
 
     @staticmethod
-    def read(filepath: str, **kwargs) -> List[Dict[str, Any]]:
+    def read(filepath: str, auto_convert: bool = True, **kwargs) -> List[Dict[str, Any]]:
         """
         自动识别文件格式并读取
 
         支持:
         - .csv  → read_csv
         - .xlsx → read_xlsx
+
+        Args:
+            auto_convert: 是否自动转换数据类型（默认 True）；设为 False 时所有值保留字符串
         """
         filepath = Path(filepath)
         suffix = filepath.suffix.lower()
 
         if suffix == ".csv":
-            return DataReader.read_csv(str(filepath), **kwargs)
+            return DataReader.read_csv(str(filepath), auto_convert=auto_convert, **kwargs)
         elif suffix in (".xlsx", ".xls"):
-            return DataReader.read_xlsx(str(filepath), **kwargs)
+            return DataReader.read_xlsx(str(filepath), auto_convert=auto_convert, **kwargs)
         else:
             raise ValueError(f"不支持的文件格式: {suffix}，仅支持 .csv / .xlsx")
 
     @staticmethod
-    def _auto_convert(value: str) -> Any:
+    def _auto_convert(value: str, auto_convert: bool = True) -> Any:
         """自动转换值类型：JSON 字符串 → dict/list，数字 → int/float"""
+        if not auto_convert:
+            return value
         if not value:
             return ""
 

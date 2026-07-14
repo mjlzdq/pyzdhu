@@ -5,6 +5,8 @@ import time
 from typing import Any, Dict, Optional
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from common.config_loader import config
 from common.logger import logger
@@ -54,7 +56,25 @@ class HttpClient:
         self.retry = retry or config.get("api", "retry", default=3)
         self.retry_delay = retry_delay
         self.session = requests.Session()
+        self._init_adapter()
         self._init_headers()
+
+    def _init_adapter(self) -> None:
+        """配置连接池和底层重试策略"""
+        adapter = HTTPAdapter(
+            pool_connections=10,
+            pool_maxsize=20,
+            max_retries=Retry(
+                total=0,  # 由上层逻辑控制重试，底层不额外重试
+                connect=None,
+                read=None,
+                redirect=3,
+                status=0,
+                other=0,
+            ),
+        )
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
 
     def _init_headers(self) -> None:
         headers = config.get("api", "headers", default={})
@@ -71,6 +91,10 @@ class HttpClient:
         if response is not None:
             return response.status_code in self.RETRYABLE_STATUS_CODES
         return True  # 连接异常应该重试
+
+    def request(self, method: str, path: str, **kwargs: Any) -> requests.Response:
+        """通用请求方法，支持所有 HTTP 动词与重试"""
+        return self._request(method, path, **kwargs)
 
     def _request(
         self,
@@ -96,12 +120,18 @@ class HttpClient:
                 )
 
                 # 服务端错误重试
-                if self._should_retry(response) and attempt < self.retry:
-                    logger.warning(
-                        f"[HTTP] 状态码 {response.status_code}，{self.retry_delay}s 后重试..."
+                if self._should_retry(response):
+                    if attempt < self.retry:
+                        logger.warning(
+                            f"[HTTP] 状态码 {response.status_code}，{self.retry_delay}s 后重试..."
+                        )
+                        time.sleep(self.retry_delay)
+                        continue
+                    # 最后一次重试仍返回可重试状态码，抛出异常而非返回错误响应
+                    raise HttpMaxRetryError(
+                        f"请求返回可重试状态码 {response.status_code}，"
+                        f"已重试 {self.retry} 次: {url}"
                     )
-                    time.sleep(self.retry_delay)
-                    continue
 
                 return response
 

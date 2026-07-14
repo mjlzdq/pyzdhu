@@ -183,8 +183,13 @@ class DDTAssertion:
         if "__contains__" in fields:
             target = fields["__contains__"]
             if isinstance(body, list):
-                found = any(target in item for item in body if isinstance(item, str))
+                found = any(
+                    target in str(item)
+                    for item in body
+                )
                 sa.check(found, f"列表中未找到包含 '{target}' 的元素")
+            elif isinstance(body, str):
+                sa.check(target in body, f"响应字符串中未找到 '{target}'")
 
         # __not_empty
         if fields.get("__not_empty"):

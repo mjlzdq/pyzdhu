@@ -95,13 +95,24 @@ run_all() {
         2>&1 | tee reports/full_test_output.log
 }
 
+# 跨平台打开文件
+_open_file() {
+    if command -v open >/dev/null 2>&1; then
+        open "$1"
+    elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$1"
+    else
+        echo "请手动打开: $1"
+    fi
+}
+
 # 打开 HTML 报告
 open_html() {
     echo ""
     echo "打开 HTML 报告..."
     REPORT_FILE="reports/html/${1:-report}.html"
     if [ -f "$REPORT_FILE" ]; then
-        open "$REPORT_FILE"
+        _open_file "$REPORT_FILE"
         echo "✓ 已打开: $REPORT_FILE"
     else
         echo "✗ 报告文件不存在: $REPORT_FILE"
@@ -118,7 +129,7 @@ allure_report() {
     echo "=========================================="
     if [ -d "reports/allure-results" ] && [ "$(ls -A reports/allure-results/*-result.json 2>/dev/null)" ]; then
         python3 generate_allure.py
-        open reports/allure-report/index.html
+        _open_file reports/allure-report/index.html
     else
         echo "✗ Allure 结果目录不存在或为空，请先运行测试"
         echo "  先执行: ./run_tests.sh api  或  ./run_tests.sh all"

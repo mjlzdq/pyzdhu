@@ -81,8 +81,9 @@ class TestPostsCRUD:
         logger.info(f"测试：创建文章 - {field}={invalid_value}")
         data = {**sample_post_data, field: invalid_value}
         response = http_client.post("/posts", json=data)
-        # jsonplaceholder 不会真正校验，这里验证请求能正常发出
-        assert response.status_code in [200, 201, 400], f"意外状态码: {response.status_code}"
+        # jsonplaceholder 为模拟 API，对无效数据仍返回 201，
+        # 此处仅验证请求可被正常接收和处理
+        assert response.status_code in [200, 201], f"意外状态码: {response.status_code}"
 
     # ==================== 更新（Update）====================
 

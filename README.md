@@ -91,7 +91,7 @@ playwright install chromium
 
 | 组件 | 最低版本 |
 |------|----------|
-| Python | 3.8+ |
+| Python | 3.9+ |
 | pip | 21.0+ |
 | Node.js | 16+（Playwright 依赖，macOS 通常已内置） |
 
@@ -309,7 +309,7 @@ pytest tests/api/ -v -m api
 
 ## 单元测试
 
-框架自身的单元测试（108 条），无需网络连接即可运行：
+框架自身及 Web 平台的单元测试（154 条），无需网络连接即可运行：
 
 ```bash
 # 运行所有单元测试
@@ -321,6 +321,8 @@ python3 -m pytest tests/unit/test_http_client.py -v
 python3 -m pytest tests/unit/test_data_reader.py -v
 python3 -m pytest tests/unit/test_data_driven.py -v
 python3 -m pytest tests/unit/test_logger.py -v
+python3 -m pytest tests/unit/test_utils.py -v
+python3 -m pytest tests/unit/test_web_platform.py -v   # Web 平台后端逻辑
 ```
 
 ## 自定义标记

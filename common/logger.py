@@ -1,11 +1,21 @@
 """
 工具模块 - 日志器
 """
+import inspect
 import logging
 import sys
 
 
 def get_logger(name: str = "AutoTest") -> logging.Logger:
+    """获取指定名称的 Logger；若未指定名称，默认使用调用模块的 __name__。"""
+    if name == "AutoTest":
+        frame = inspect.currentframe()
+        if frame and frame.f_back:
+            caller_name = frame.f_back.f_globals.get("__name__")
+            if caller_name and caller_name != __name__:
+                name = caller_name
+            del frame
+
     logger = logging.getLogger(name)
 
     if not logger.handlers:
@@ -24,4 +34,5 @@ def get_logger(name: str = "AutoTest") -> logging.Logger:
     return logger
 
 
-logger = get_logger()
+# 向后兼容：模块级默认 logger
+logger = get_logger("AutoTest")

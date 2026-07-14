@@ -2,20 +2,26 @@
 配置加载器模块 - 支持多环境配置与环境变量覆盖
 """
 import os
-import yaml
+import threading
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+import yaml
 
 
 class ConfigLoader:
     """配置加载器（线程安全单例），支持多环境配置和环境变量覆盖"""
 
     _instance: Optional["ConfigLoader"] = None
+    _lock = threading.Lock()
 
     def __new__(cls) -> "ConfigLoader":
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._config = None
+            with cls._lock:
+                # 双重检查锁定，确保多线程下只创建一个实例
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._config = None
         return cls._instance
 
     def _load_config(self) -> None:

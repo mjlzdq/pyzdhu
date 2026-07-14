@@ -30,6 +30,11 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
+from common.http_client import (
+    HttpClient, HttpError, HttpTimeoutError, HttpMaxRetryError,
+)
+from common.utils import get_nested
+
 app = FastAPI(title="接口批量测试平台", version="2.0")
 
 # 静态文件（CSS 等零外网资源）
@@ -184,30 +189,6 @@ def _render_all_placeholders(data, pool: Dict[str, Any]) -> Any:
 # ═══════════════════════════════════════════════════════════════
 # 工具函数
 # ═══════════════════════════════════════════════════════════════
-
-def _get_nested(data, path: str) -> Any:
-    """从嵌套结构中提取字段，支持 data.token / data.list[0].status"""
-    if not isinstance(data, (dict, list)):
-        return None
-    # 按 . 或 [n] 分割
-    parts = re.split(r'(?<=\])\.|\.|(?=\[)', path)
-    parts = [p for p in parts if p]
-    cur = data
-    for part in parts:
-        if part.startswith('[') and part.endswith(']'):
-            idx = int(part[1:-1])
-            if isinstance(cur, list) and 0 <= idx < len(cur):
-                cur = cur[idx]
-            else:
-                return None
-        elif isinstance(cur, dict):
-            cur = cur.get(part)
-            if cur is None:
-                return None
-        else:
-            return None
-    return cur
-
 
 def _truncate(data, max_len=2000):
     s = json.dumps(data, ensure_ascii=False) if isinstance(data, (dict, list)) else str(data)
@@ -370,7 +351,7 @@ class TestRunner:
             name, path = pair.split("=", 1)
             name = name.strip()
             path = path.strip()
-            val = _get_nested(resp_body, path)
+            val = get_nested(resp_body, path)
             if val is not None:
                 self.pool[name] = val
 
@@ -410,7 +391,7 @@ class TestRunner:
             ):
                 field_name = key[len("expected_"):]
                 expected_val = row[key]
-                actual_val = _get_nested(resp_body, field_name)
+                actual_val = get_nested(resp_body, field_name)
 
                 # 统一转字符串比较
                 exp = str(expected_val) if expected_val is not None else ""
@@ -643,11 +624,58 @@ async def export_results(results_json: str = Form(...)):
 
 
 # ═══════════════════════════════════════════════════════════════
-# 单接口调试（复用 HttpClient 的重试/超时逻辑）
+# 单接口调试（复用 common.http_client.HttpClient 的重试/超时逻辑）
 # ═══════════════════════════════════════════════════════════════
 
-# 可重试的状态码
-_RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
+class _AttemptLogSession(requests.Session):
+    """包装 requests.Session，记录每次请求尝试，供 Web 平台展示重试过程。"""
+
+    def __init__(self):
+        super().__init__()
+        self.attempts: list = []
+
+    def request(self, method, url, **kwargs):
+        t0 = time.time()
+        try:
+            resp = super().request(method, url, **kwargs)
+            self.attempts.append({
+                "attempt": len(self.attempts) + 1,
+                "status_code": resp.status_code,
+                "elapsed_ms": round((time.time() - t0) * 1000),
+                "retried": False,
+                "error": None,
+            })
+            return resp
+        except (requests.Timeout, requests.ConnectionError) as e:
+            self.attempts.append({
+                "attempt": len(self.attempts) + 1,
+                "status_code": 0,
+                "elapsed_ms": round((time.time() - t0) * 1000),
+                "retried": False,
+                "error": f"{type(e).__name__}: {e}",
+            })
+            raise
+
+
+class _DebugHttpClient(HttpClient):
+    """扩展 HttpClient，使用带尝试日志的 Session。"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 用空日志会话替换默认会话，保证返回的请求头仅含用户传入的头
+        self.session = _AttemptLogSession()
+
+
+def _finalize_attempts(attempts: list) -> None:
+    """
+    回填 retried 标记。
+
+    语义与原始重试逻辑一致：若某次尝试之后还有后续尝试，
+    说明它触发了重试（retried=True），最后一次尝试必然为 False。
+    """
+    last = len(attempts) - 1
+    for i, attempt in enumerate(attempts):
+        attempt["retried"] = i < last
 
 
 def _single_request(
@@ -660,13 +688,17 @@ def _single_request(
     retry_delay: float = 1.0,
 ) -> Dict[str, Any]:
     """
-    发送单次 HTTP 请求，带重试机制（逻辑与 common/http_client.py 一致）。
+    发送单次 HTTP 请求，带重试机制（复用 common.http_client.HttpClient）。
     返回统一结构，包含请求详情、响应和耗时。
     """
-    req_headers = headers or {}
+    client = _DebugHttpClient(
+        base_url="", timeout=timeout, retry=retry, retry_delay=retry_delay,
+    )
+    if headers:
+        client.session.headers.update(headers)
+
     req_body_text = body or ""
     json_body = None
-
     if req_body_text.strip():
         try:
             json_body = json.loads(req_body_text)
@@ -674,107 +706,54 @@ def _single_request(
             pass  # 非 JSON body 保持 None
 
     start = time.time()
-    last_exception = None
-    attempts_log = []
-    final_resp = None
-
-    session = requests.Session()
     try:
-        for attempt in range(1, retry + 1):
-            try:
-                t0 = time.time()
-                resp = session.request(
-                    method=method.upper(),
-                    url=url,
-                    headers=req_headers,
-                    json=json_body,
-                    data=None if json_body else (req_body_text or None),
-                    timeout=timeout,
-                )
-                elapsed = round((time.time() - t0) * 1000)
-                attempts_log.append({
-                    "attempt": attempt,
-                    "status_code": resp.status_code,
-                    "elapsed_ms": elapsed,
-                    "retried": False,
-                })
-
-                # 服务端错误 → 重试
-                if resp.status_code in _RETRYABLE_STATUS and attempt < retry:
-                    attempts_log[-1]["retried"] = True
-                    time.sleep(retry_delay)
-                    continue
-
-                final_resp = resp
-                break
-
-            except (requests.Timeout, requests.ConnectionError) as e:
-                last_exception = e
-                retried = attempt < retry
-                attempts_log.append({
-                    "attempt": attempt,
-                    "status_code": 0,
-                    "elapsed_ms": round((time.time() - t0) * 1000),
-                    "retried": retried,
-                    "error": f"{type(e).__name__}: {e}",
-                })
-                if retried:
-                    time.sleep(retry_delay)
-
-            except requests.RequestException as e:
-                last_exception = e
-                attempts_log.append({
-                    "attempt": attempt,
-                    "status_code": 0,
-                    "elapsed_ms": 0,
-                    "retried": False,
-                    "error": str(e),
-                })
-                break
-    finally:
-        session.close()
-
-    total_elapsed_ms = round((time.time() - start) * 1000)
-
-    if final_resp is not None:
-        try:
-            resp_json = final_resp.json()
-        except Exception:
-            resp_json = None
-
+        resp = client._request(
+            method, url,
+            json=json_body,
+            data=None if json_body else (req_body_text or None),
+        )
+    except HttpError as e:
+        _finalize_attempts(client.session.attempts)
         return {
-            "success": True,
+            "success": False,
             "request": {
                 "method": method.upper(),
                 "url": url,
-                "headers": req_headers,
+                "headers": dict(client.session.headers),
                 "body": req_body_text,
             },
-            "response": {
-                "status_code": final_resp.status_code,
-                "headers": dict(final_resp.headers),
-                "body_text": final_resp.text[:50000],
-                "body_json": resp_json,
-                "elapsed_ms": total_elapsed_ms,
-                "content_length": len(final_resp.content),
-            },
-            "attempts": attempts_log,
-            "retry_used": len([a for a in attempts_log if a.get("retried")]) > 0,
+            "error": str(e),
+            "attempts": client.session.attempts,
+            "retry_used": any(a.get("retried") for a in client.session.attempts),
+            "elapsed_ms": round((time.time() - start) * 1000),
         }
+    finally:
+        client.close()
 
-    # 所有重试耗尽
+    _finalize_attempts(client.session.attempts)
+    try:
+        resp_json = resp.json()
+    except Exception:
+        resp_json = None
+
     return {
-        "success": False,
+        "success": True,
         "request": {
             "method": method.upper(),
             "url": url,
-            "headers": req_headers,
+            "headers": dict(client.session.headers),
             "body": req_body_text,
         },
-        "error": str(last_exception) if last_exception else "Unknown error",
-        "attempts": attempts_log,
-        "retry_used": True,
-        "elapsed_ms": total_elapsed_ms,
+        "response": {
+            "status_code": resp.status_code,
+            "headers": dict(resp.headers),
+            "body_text": resp.text[:50000],
+            "body_json": resp_json,
+            "elapsed_ms": round((time.time() - start) * 1000),
+            "content_length": len(resp.content),
+        },
+        "attempts": client.session.attempts,
+        "retry_used": any(a.get("retried") for a in client.session.attempts),
     }
 
 

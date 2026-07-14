@@ -49,18 +49,25 @@ class ConfigLoader:
     @property
     def api_base_url(self) -> str:
         """API Base URL（可通过 PYZDHU_API_URL 环境变量覆盖）"""
-        return os.environ.get(
-            "PYZDHU_API_URL",
-            self._raw_config["environments"][self.env]["api_base_url"],
-        )
+        return os.environ.get("PYZDHU_API_URL") or self._env_url("api_base_url")
 
     @property
     def ui_base_url(self) -> str:
         """UI Base URL（可通过 PYZDHU_UI_URL 环境变量覆盖）"""
-        return os.environ.get(
-            "PYZDHU_UI_URL",
-            self._raw_config["environments"][self.env]["ui_base_url"],
-        )
+        return os.environ.get("PYZDHU_UI_URL") or self._env_url("ui_base_url")
+
+    def _env_url(self, key: str) -> str:
+        """
+        按当前环境取 URL。
+
+        当当前环境在配置中不存在时，回退到默认环境（test）或第一个可用环境，
+        避免 KeyError 导致整个配置加载器崩溃。
+        """
+        envs = self._raw_config.get("environments", {})
+        env_cfg = envs.get(self.env)
+        if env_cfg is None:
+            env_cfg = envs.get("test") or next(iter(envs.values()), {})
+        return env_cfg.get(key, "")
 
     @property
     def api_config(self) -> Dict[str, Any]:

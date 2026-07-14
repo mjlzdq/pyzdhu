@@ -27,11 +27,13 @@ jobs:
       # ===== 质量门禁 =====
       # ① 任意用例失败 → pytest 退出非 0 → job 失败 → PR 不能合并
       # ② --cov-fail-under=70 → 覆盖率 < 70% 也失败
-      # 把 tests/unit 改成你实际放单元测试的目录（整个项目就写 tests/）
+      # 覆盖率仅统计业务源码（common + web_platform），排除测试文件与工具脚本
       - name: Run unit tests + coverage gate
         run: |
           pytest tests/unit \
-            --cov=. --cov-fail-under=70 \
+            --cov=common --cov=web_platform \
+            --cov-report=term-missing \
+            --cov-fail-under=70 \
             --alluredir=reports/allure-results
 
       - name: Upload Allure results

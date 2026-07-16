@@ -31,3 +31,5 @@ venv/
 
 # CodeBuddy（内部数据，非项目代码）
 .codebuddy/teams/
+__pycache__/
+*.pyc

@@ -1,0 +1,5 @@
+INFO     AutoTest:http_client.py:112 [HTTP] GET https://test.example.com/test (attempt 1/3)
+INFO     AutoTest:http_client.py:117 [HTTP] ← 500 (21 bytes, 0.00s)
+WARNING  AutoTest:http_client.py:125 [HTTP] 状态码 500，0.01s 后重试...
+INFO     AutoTest:http_client.py:112 [HTTP] GET https://test.example.com/test (attempt 2/3)
+INFO     AutoTest:http_client.py:117 [HTTP] ← 200 (12 bytes, 0.00s)

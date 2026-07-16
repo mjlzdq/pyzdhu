@@ -1,0 +1,2 @@
+INFO     AutoTest:http_client.py:112 [HTTP] POST https://test.example.com/posts (attempt 1/3)
+INFO     AutoTest:http_client.py:117 [HTTP] ← 201 (12 bytes, 0.00s)

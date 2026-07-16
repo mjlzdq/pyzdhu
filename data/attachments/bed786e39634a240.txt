@@ -1,0 +1,1 @@
+ERROR    AutoTest:data_driven.py:154 [TC06] 断言失败: 1/2 通过

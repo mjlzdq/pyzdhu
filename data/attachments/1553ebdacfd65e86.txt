@@ -1,0 +1,4 @@
+INFO     AutoTest:http_client.py:112 [HTTP] GET https://test.example.com/test (attempt 1/2)
+WARNING  AutoTest:http_client.py:146 [HTTP] 连接失败 (attempt 1/2): always fail
+INFO     AutoTest:http_client.py:112 [HTTP] GET https://test.example.com/test (attempt 2/2)
+WARNING  AutoTest:http_client.py:146 [HTTP] 连接失败 (attempt 2/2): always fail

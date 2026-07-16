@@ -1,0 +1,5 @@
+2026-07-16 03:15:40 [INFO] AutoTest - [HTTP] GET https://test.example.com/test (attempt 1/3)
+2026-07-16 03:15:40 [INFO] AutoTest - [HTTP] ← 500 (21 bytes, 0.00s)
+2026-07-16 03:15:40 [WARNING] AutoTest - [HTTP] 状态码 500，0.01s 后重试...
+2026-07-16 03:15:40 [INFO] AutoTest - [HTTP] GET https://test.example.com/test (attempt 2/3)
+2026-07-16 03:15:40 [INFO] AutoTest - [HTTP] ← 200 (12 bytes, 0.00s)

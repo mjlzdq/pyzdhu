@@ -1,0 +1,3 @@
+2026-07-16 03:15:40 [INFO] FunctionalTest - info message
+2026-07-16 03:15:40 [WARNING] FunctionalTest - warning message
+2026-07-16 03:15:40 [ERROR] FunctionalTest - error message

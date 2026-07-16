@@ -1,0 +1,2 @@
+INFO     AutoTest:http_client.py:112 [HTTP] GET https://test.example.com/test (attempt 1/3)
+ERROR    AutoTest:http_client.py:152 [HTTP] 请求异常: redirect loop

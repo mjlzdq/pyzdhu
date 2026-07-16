@@ -1,0 +1,1 @@
+INFO     AutoTest:data_driven.py:156 [TC12] 断言通过: 2/2 通过

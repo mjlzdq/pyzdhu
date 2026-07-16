@@ -1,0 +1,4 @@
+2026-07-16 03:15:40 [INFO] AutoTest - [HTTP] GET https://test.example.com/test (attempt 1/2)
+2026-07-16 03:15:40 [WARNING] AutoTest - [HTTP] 连接失败 (attempt 1/2): always fail
+2026-07-16 03:15:40 [INFO] AutoTest - [HTTP] GET https://test.example.com/test (attempt 2/2)
+2026-07-16 03:15:40 [WARNING] AutoTest - [HTTP] 连接失败 (attempt 2/2): always fail

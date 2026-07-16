@@ -1,0 +1,4 @@
+DEBUG    FunctionalTest:test_logger.py:55 debug message
+INFO     FunctionalTest:test_logger.py:56 info message
+WARNING  FunctionalTest:test_logger.py:57 warning message
+ERROR    FunctionalTest:test_logger.py:58 error message

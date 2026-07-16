@@ -1,0 +1,24 @@
+[run]
+source =
+    common
+    web_platform/backend/core
+omit =
+    tests/*
+    */__pycache__/*
+    venv/*
+    .venv/*
+    */conftest.py
+    web_platform/backend/main.py
+    web_platform/backend/routes/*
+    web_platform/backend/core/debug_client.py
+    web_platform/frontend/*
+    generate_allure.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    pass
+    raise ImportError

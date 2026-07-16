@@ -85,12 +85,16 @@ jobs:
           path: gh-pages
         continue-on-error: true       # 首次没有 gh-pages 分支会跳过，正常
 
+      - name: Install Allure CLI
+        run: npm install -g allure-commandline
+
       - name: Build Allure report
-        uses: simple-elf/allure-report-action@v1
-        with:
-          allure_results: allure-results
-          gh_pages: gh-pages
-          allure_history: allure-history
+        run: |
+          mkdir -p allure-history
+          if [ -d "gh-pages/allure-history" ]; then
+            cp -r gh-pages/allure-history/* allure-history/ 2>/dev/null || true
+          fi
+          allure generate allure-results -o allure-history --clean
 
       - name: Deploy report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

@@ -86,14 +86,14 @@ jobs:
         continue-on-error: true       # 首次没有 gh-pages 分支会跳过，正常
 
       - name: Build Allure report
-        uses: simple-elf/allure-report-action@master
+        uses: simple-elf/allure-report-action@v1
         with:
           allure_results: allure-results
           gh_pages: gh-pages
           allure_history: allure-history
 
       - name: Deploy report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: allure-history
